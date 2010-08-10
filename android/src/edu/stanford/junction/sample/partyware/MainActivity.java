@@ -94,14 +94,14 @@ public class MainActivity extends Activity{
 				String contents = intent.getStringExtra("SCAN_RESULT");
 				String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
 				showDialog("Format: " + format + "\nContents: " + contents);
-			} 
+			}
 			break;
 		case REQUEST_CODE_ADD_PIC:
 			if(resultCode == RESULT_OK){
 				Uri uri = intent.getData();
 				String comment = intent.getStringExtra(AddPictureActivity.EXTRA_COMMENT);
 				showDialog("URL: " + uri + "\nComment: " + comment);				
-			} 
+			}
 			break;
 		}
 	}
@@ -112,8 +112,6 @@ public class MainActivity extends Activity{
 		builder.setPositiveButton("OK", null);
 		builder.show();
 	}
-
-
 
 }
 
