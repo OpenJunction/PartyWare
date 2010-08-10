@@ -4,10 +4,16 @@
 	  android:versionCode="1"
 	  android:versionName="1.0">
 
+  <supports-screens
+      android:largeScreens="true"
+      android:normalScreens="true"
+      android:smallScreens="true"
+      android:anyDensity="true"/>
 
   <!-- PERMISSIONS -->
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="android.permission.CAMERA"/>
+  <uses-permission android:name="android.permission.FLASHLIGHT"/>
 
 
 
@@ -28,9 +34,22 @@
     </activity>
 
 
+    <activity android:name="edu.stanford.junction.sample.partyware.AddPictureActivity"
+	      android:label="@string/add_picture"
+	      android:screenOrientation="portrait">
+      <intent-filter>
+	<action android:name="edu.stanford.junction.sample.partyware.ADD_PICTURE" />
+	<category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </activity>
+
+
+    <service android:name="edu.stanford.junction.sample.partyware.ImgurUpload">
+    </service>
+
 
     <activity android:name="com.google.zxing.client.android.CaptureActivity"
-              android:screenOrientation="portrait"
+              android:screenOrientation="landscape"
               android:configChanges="orientation|keyboardHidden"
               android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
       <intent-filter>

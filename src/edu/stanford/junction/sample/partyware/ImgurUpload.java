@@ -60,10 +60,11 @@ public class ImgurUpload extends Service {
     private static final int PROGRESS_UPDATE_INTERVAL_MS = 250;
     private static final int CHUNK_SIZE = 9000;
     private static final int READ_BUFFER_SIZE_BYTES = (3 * CHUNK_SIZE) / 4;
-    private static final String API_KEY = "e67bb2d5ceb42e43f8f7fc38e7ca7376";
+    private static final String API_KEY = "4e219fc7820b0d6ab44f3237fe7ca04f";
     private static final int THUMBNAIL_MAX_SIZE = 200;
 
-    public static final String BROADCAST_ACTION = "com.maass.android.imgur_uploader.ImageUploadedEvent";
+    public static final String BROADCAST_FINISHED = "edu.stanford.junction.sample.partyware.ImageUploadedEvent";
+    public static final String BROADCAST_FAILED = "edu.stanford.junction.sample.partyware.ImageUploadErrorEvent";
     private Notification mProgressNotification;
     private static final int NOTIFICATION_ID = 42;
     private NotificationManager mNotificationManager;
@@ -116,57 +117,30 @@ public class ImgurUpload extends Service {
 
     private void handleResponse() {
         Log.i(this.getClass().getName(), "in handleResponse()");
-        // close progress notification
-        mNotificationManager.cancel(NOTIFICATION_ID);
-
-        String notificationMessage = getString(R.string.imgur_upload_success);
-
-        // notification intent with result
-        final Intent resultIntent = new Intent();
-
         if (mImgurResponse == null) {
-            notificationMessage = getString(R.string.imgur_connection_failed);
-        } else if (mImgurResponse.get("error") != null) {
-            notificationMessage = getString(R.string.imgur_unknown_error)
-                + mImgurResponse.get("error");
-        } else {
-            // create thumbnail
-            if (mImgurResponse.get("image_hash").length() > 0) {
-                createThumbnail(imageLocation);
-            }
+			final Intent resultIntent = new Intent(BROADCAST_FAILED);
+            resultIntent.putExtra("error", getString(R.string.imgur_connection_failed));
+            sendBroadcast(resultIntent);
+        } 
+		else if (mImgurResponse.get("error") != null) {
+			final Intent resultIntent = new Intent(BROADCAST_FAILED);
+            resultIntent.putExtra("error", mImgurResponse.get("error"));
+            sendBroadcast(resultIntent);
+        } 
+		else {
+			final Intent resultIntent = new Intent(BROADCAST_FINISHED);
 
-            final Uri imageUri = Uri.parse(getFilesDir() + "/"
-										   + mImgurResponse.get("image_hash") + THUMBNAIL_POSTFIX);
-
-
-            //set intent to go to image details
             resultIntent.putExtra("hash", mImgurResponse
 								  .get("image_hash"));
+
             resultIntent.putExtra("image_url", mImgurResponse
 								  .get("original"));
+
             resultIntent.putExtra("delete_hash", mImgurResponse
 								  .get("delete_hash"));
-            resultIntent.putExtra("local_thumbnail", imageUri.toString());
 
-
-            // if the main activity is already open then refresh the gridview
-            sendBroadcast(new Intent(BROADCAST_ACTION));
+            sendBroadcast(resultIntent);
         }
-
-        //assemble notification
-        final Notification notification = new Notification(
-			R.drawable.icon,
-            notificationMessage, System.currentTimeMillis());
-
-        notification.setLatestEventInfo(
-			this, 
-			getString(R.string.app_name),
-			notificationMessage, 
-			PendingIntent.getActivity(getBaseContext(), 0,
-									  resultIntent, 
-									  PendingIntent.FLAG_CANCEL_CURRENT));
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        mNotificationManager.notify(NOTIFICATION_ID, notification);
 
     }
 

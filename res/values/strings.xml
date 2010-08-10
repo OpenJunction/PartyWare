@@ -16,9 +16,14 @@
  -->
 <resources>
   <string name="app_name">PartyWare</string>
+  <string name="add_picture">Add Picture to Party</string>
+  <string name="starting_image_upload">Uploading Image...</string>
+  <string name="no_image_selected">No Image Selected!</string>
+  <string name="add_caption">A caption for this image...</string>
+
 
   <string name="imgur_upload_success">Image uploaded successfully</string>
-  <string name="imgur_connection_failed">Failed to connection to imgur.com</string>
+  <string name="imgur_connection_failed">Upload connection failed.</string>
   <string name="imgur_unknown_error">Error uploading to imgur.com</string>
   <string name="imgur_upload_in_progress">Image upload in progress</string>
 
