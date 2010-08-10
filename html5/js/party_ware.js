@@ -34,7 +34,7 @@ var PartyWare =
 								 $('<img/>').attr(
 									 {
 										 src: item.url
-									 }));
+									 }).addClass("timelineImage"));
 
 						 }
 						 else if(item.type == "youtube"){
