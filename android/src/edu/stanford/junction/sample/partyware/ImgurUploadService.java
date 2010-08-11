@@ -55,7 +55,7 @@ import android.widget.RemoteViews;
 import android.util.Log;
 
 
-public class ImgurUpload extends Service {
+public class ImgurUploadService extends Service {
     private static final String THUMBNAIL_POSTFIX = ".thumb.jpg";
     private static final int PROGRESS_UPDATE_INTERVAL_MS = 250;
     private static final int CHUNK_SIZE = 9000;

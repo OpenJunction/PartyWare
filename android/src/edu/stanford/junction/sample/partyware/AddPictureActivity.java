@@ -119,7 +119,7 @@ public class AddPictureActivity extends Activity{
 					mUriView.setText(mUri.toString());
 				}
 			};
-		IntentFilter intentFilter = new IntentFilter(ImgurUpload.BROADCAST_FINISHED);
+		IntentFilter intentFilter = new IntentFilter(ImgurUploadService.BROADCAST_FINISHED);
 		registerReceiver(mUriReceiver, intentFilter); 
 
 		mErrorReceiver = new BroadcastReceiver() {
@@ -130,10 +130,10 @@ public class AddPictureActivity extends Activity{
 					showDialog(error);
 				}
 			};
-		intentFilter = new IntentFilter(ImgurUpload.BROADCAST_FAILED);
+		intentFilter = new IntentFilter(ImgurUploadService.BROADCAST_FAILED);
 		registerReceiver(mErrorReceiver, intentFilter);
 
-		Intent i = new Intent(this, ImgurUpload.class);
+		Intent i = new Intent(this, ImgurUploadService.class);
 		i.setAction(Intent.ACTION_SEND);
 		i.putExtra(Intent.EXTRA_STREAM, localUri);
 		startService(i);
@@ -199,7 +199,7 @@ public class AddPictureActivity extends Activity{
 		}
 		else{
 			// stop the image uploader service
-			Intent i = new Intent(this, ImgurUpload.class);
+			Intent i = new Intent(this, ImgurUploadService.class);
 			stopService(i);
 
 			// return the uri with comment
@@ -227,7 +227,7 @@ public class AddPictureActivity extends Activity{
 			unregisterReceiver(mUriReceiver);
 			unregisterReceiver(mErrorReceiver);
 
-			Intent i = new Intent(this, ImgurUpload.class);
+			Intent i = new Intent(this, ImgurUploadService.class);
 			stopService(i);
 		}
 		catch(IllegalArgumentException e){}

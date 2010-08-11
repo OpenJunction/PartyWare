@@ -12,18 +12,24 @@ import edu.stanford.junction.props2.Prop;
 import edu.stanford.junction.props2.sample.ListState;
 import edu.stanford.junction.props2.IPropChangeListener;
 
-import android.content.ServiceConnection;
-import android.content.ContentValues;
-import android.os.Bundle;
-import android.os.Process;
-import android.content.Intent;
 import android.app.Service;
 import android.app.Activity;
+import android.app.TabActivity;
 import android.app.AlertDialog;
+import android.content.ServiceConnection;
+import android.content.ContentValues;
+import android.content.Intent;
+import android.content.res.Resources;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Process;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.net.Uri;
+import android.widget.Button;
+import android.widget.TabHost;
+import android.widget.TabHost.TabSpec;
 
 import org.json.*;
 
@@ -32,86 +38,61 @@ import java.io.*;
 import java.util.*;
 
 
-public class MainActivity extends Activity{
+public class MainActivity extends TabActivity{
 
 	private static final int SCAN_URL = 0;
 	private static final int ADD_PIC = 1;
 	private static final int EXIT = 2;
 
-	public final static int REQUEST_CODE_SCAN_URL = 0;
-	public final static int REQUEST_CODE_ADD_PIC = 1;
-
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setContentView(R.layout.main);
+
+		// Create top-level tabs
+
+		Resources res = getResources(); // Resource object to get Drawables
+		TabHost tabHost = getTabHost();  // The activity TabHost
+		TabHost.TabSpec spec;  // Resusable TabSpec for each tab
+		Intent intent;  // Reusable Intent for each tab
+
+		// Create an Intent to launch an Activity for the tab (to be reused)
+		intent = new Intent().setClass(this, PartyActivity.class);
+		// Initialize a TabSpec for each tab and add it to the TabHost
+		spec = tabHost.newTabSpec("party").setIndicator(
+			"Party",
+			res.getDrawable(R.drawable.shopper_icon)).setContent(intent);
+		tabHost.addTab(spec);
+
+		intent = new Intent().setClass(this, YoutubePlaylistActivity.class);
+		spec = tabHost.newTabSpec("playlist").setIndicator(
+			"Playlist",
+			res.getDrawable(R.drawable.shopper_icon)).setContent(intent);
+		tabHost.addTab(spec);
+
+		intent = new Intent().setClass(this, PicturesActivity.class);
+		spec = tabHost.newTabSpec("pictures").setIndicator(
+			"Pictures",
+			res.getDrawable(R.drawable.shopper_icon)).setContent(intent);
+		tabHost.addTab(spec);
+
+		tabHost.setCurrentTab(0);
+
+
+		// Start the junction service
+		Intent i = new Intent(this, JunctionService.class);
+		startService(i);
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu){
-		return true;
-	}
 
-	@Override
-	public boolean onPreparePanel(int featureId, View view, Menu menu){
-		menu.clear();
-		menu.add(0,SCAN_URL,0, "Join Session");
-		menu.add(0,ADD_PIC,0, "Add Picture");
-		menu.add(0,EXIT,0,"Exit");
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected (MenuItem item){
-		switch (item.getItemId()){
-		case SCAN_URL:
-			scanURL();
-			return true;
-		case ADD_PIC:
-			addPic();
-			return true;
-		case EXIT:
-			Process.killProcess(Process.myPid());
-		}
-		return false;
+	public void onDestroy(){
+		super.onDestroy();
+		// Start the junction service
+		Intent i = new Intent(this, JunctionService.class);
+		stopService(i);
 	}
 
 
-	protected void scanURL(){
-		Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-		intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-		startActivityForResult(intent, REQUEST_CODE_SCAN_URL);		
-	}
 
-	protected void addPic(){
-		Intent intent = new Intent(AddPictureActivity.LAUNCH_INTENT);
-		startActivityForResult(intent, REQUEST_CODE_ADD_PIC);
-	}
-
-	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		switch(requestCode) {
-		case REQUEST_CODE_SCAN_URL:
-			if(resultCode == RESULT_OK){
-				String contents = intent.getStringExtra("SCAN_RESULT");
-				String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
-				showDialog("Format: " + format + "\nContents: " + contents);
-			}
-			break;
-		case REQUEST_CODE_ADD_PIC:
-			if(resultCode == RESULT_OK){
-				Uri uri = intent.getData();
-				String comment = intent.getStringExtra(AddPictureActivity.EXTRA_COMMENT);
-				showDialog("URL: " + uri + "\nComment: " + comment);				
-			}
-			break;
-		}
-	}
-
-	private void showDialog(String message) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(message);
-		builder.setPositiveButton("OK", null);
-		builder.show();
-	}
 
 }
 
