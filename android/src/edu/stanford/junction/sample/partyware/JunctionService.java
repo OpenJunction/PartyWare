@@ -43,8 +43,8 @@ import org.json.JSONObject;
 public class JunctionService extends Service {
     private JunctionActor jxActor;
     private Junction jx;
-    private Handler jxMessageHandler;
     private PartyProp partyProp;
+    private Thread connectionThread;
 
     private static JunctionService instance;
     
@@ -68,8 +68,6 @@ public class JunctionService extends Service {
 		super.onCreate();
 		partyProp = new PartyProp("party_prop");
 		instance = this;
-
-
 		// For debugging
 		initJunction(Uri.parse("junction://openjunction.org/partyware"));
     }
@@ -88,45 +86,60 @@ public class JunctionService extends Service {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		jxActor.leave();
+		if(jxActor != null){
+			jxActor.leave();
+		}
+		if(connectionThread != null){
+			connectionThread.interrupt();
+		}
 	}
 
 	protected void initJunction(final Uri uri){
 
-		jxMessageHandler = new Handler() {
+		if(connectionThread != null){
+			connectionThread.interrupt();
+		}
+
+		final Handler handler = new Handler() {
 				public void handleMessage(Message msgFromChild) {
 					JSONObject msg = (JSONObject) msgFromChild.obj;
 					try {
 						Log.i("JunctionService", "Got junction msg: " + msg);
 					} catch (Exception e) {
-						System.out.println(e);
+						e.printStackTrace(System.err);
 					}
 				}
 			};
 
-		jxActor = new JunctionActor("participant") {
-				public void onActivityJoin() {
-					Log.i("JunctionService", "Joined activity!");
-				}
-				public void onActivityCreate(){
-					Log.i("JunctionService", "You created the activity.");
-				}
-				public void onMessageReceived(MessageHeader header, JSONObject msg) {
-					Message toMain = jxMessageHandler.obtainMessage();
-					toMain.obj = msg;
-					jxMessageHandler.sendMessage(toMain);
-				}
-				public List<JunctionExtra> getInitialExtras(){
-					ArrayList<JunctionExtra> l = new ArrayList<JunctionExtra>();
-					l.add(partyProp);
-					return l;
-				}
-			};
-
-		final XMPPSwitchboardConfig sb = new XMPPSwitchboardConfig("openjunction.org");
-
 		Thread t = new Thread(){
+
 				public void run(){
+
+					if(jxActor != null){
+						jxActor.leave();
+					}
+
+					JunctionActor actor = new JunctionActor("participant") {
+							public void onActivityJoin() {
+								Log.i("JunctionService", "Joined activity!");
+							}
+							public void onActivityCreate(){
+								Log.i("JunctionService", "You created the activity.");
+							}
+							public void onMessageReceived(MessageHeader header, JSONObject msg) {
+								Message toMain = handler.obtainMessage();
+								toMain.obj = msg;
+								handler.sendMessage(toMain);
+							}
+							public List<JunctionExtra> getInitialExtras(){
+								ArrayList<JunctionExtra> l = new ArrayList<JunctionExtra>();
+								l.add(partyProp);
+								return l;
+							}
+						};
+
+					final XMPPSwitchboardConfig sb = new XMPPSwitchboardConfig("openjunction.org");
+					sb.setConnectionTimeout(20000); // 20 secs
 
 					URI url = null;
 					try{
@@ -137,9 +150,12 @@ public class JunctionService extends Service {
 						return;
 					}
 
-
 					try{
-						jx = AndroidJunctionMaker.getInstance(sb).newJunction(url, jxActor);
+						Junction jx = AndroidJunctionMaker.getInstance(sb).newJunction(url, actor);
+						if(!isInterrupted()){
+							JunctionService.this.jx = jx;
+							JunctionService.this.jxActor = actor;
+						}
 					}
 					catch(JunctionException e){
 						Log.e("JunctionService","Failed to connect to junction activity!");
@@ -147,10 +163,12 @@ public class JunctionService extends Service {
 					}
 					catch(Exception e){
 						Log.e("JunctionService","Failed to connect to junction activity!");
+						e.printStackTrace(System.err);
 					}
 				}
 			};
+		
 		t.start();
-			
+		connectionThread = t;
 	}
 }
