@@ -10,7 +10,7 @@
   <Button
       android:id="@+id/join_party_button"
       android:layout_width="120dip"
-      android:layout_height="70dip"
+      android:layout_height="50dip"
       android:text="Join New Party"
       />
 

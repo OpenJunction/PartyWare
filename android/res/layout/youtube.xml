@@ -12,11 +12,11 @@
       android:gravity="center"
       >
     <Button
-	android:id="@+id/add_picture_button"
+	android:id="@+id/add_video_button"
 	android:layout_width="wrap_content"
 	android:layout_height="50dip"
 	android:layout_margin="5dip"
-	android:text="Add Pic!"
+	android:text="Add a Video!"
 	/> 
   </LinearLayout>
 

@@ -34,7 +34,7 @@ import java.util.*;
 import java.text.DateFormat;
 
 
-public class PicturesActivity extends ListActivity implements OnItemClickListener{
+public class PicturesActivity extends RichListActivity implements OnItemClickListener{
 
     private Handler mMainHandler;
     private ArrayAdapter<JSONObject> mPics;
@@ -45,6 +45,7 @@ public class PicturesActivity extends ListActivity implements OnItemClickListene
 
     public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		setContentView(R.layout.pictures);
 
 		mPics = new ArrayAdapter<JSONObject>(
@@ -55,8 +56,6 @@ public class PicturesActivity extends ListActivity implements OnItemClickListene
 		getListView().setTextFilterEnabled(true);
 		getListView().setOnItemClickListener(this); 
 
-		for(int i = 0; i < 20; i++) mPics.add(randomTestObj());
-
 		Button button = (Button)findViewById(R.id.add_picture_button);
 		button.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
@@ -64,20 +63,28 @@ public class PicturesActivity extends ListActivity implements OnItemClickListene
 				}
 			});
 
-		Prop prop = JunctionService.getProp();
-		prop.addChangeListener(new IPropChangeListener(){
-				public String getType(){ return Prop.EVT_CHANGE; }
-				public void onChange(Object data){
-					refresh();
-				}
-			});
+		try{
+			Prop prop = JunctionService.getProp();
+			prop.addChangeListener(new IPropChangeListener(){
+					public String getType(){ return Prop.EVT_CHANGE; }
+					public void onChange(Object data){
+						refresh();
+					}
+				});
 
-		prop.addChangeListener(new IPropChangeListener(){
-				public String getType(){ return Prop.EVT_SYNC; }
-				public void onChange(Object data){
-					refresh();
-				}
-			});
+			prop.addChangeListener(new IPropChangeListener(){
+					public String getType(){ return Prop.EVT_SYNC; }
+					public void onChange(Object data){
+						refresh();
+					}
+				});
+		}
+		catch(IllegalStateException e){
+			toastShort("Failed to get info from service! See debug log.");
+			e.printStackTrace(System.err);
+		}
+
+		refresh();
 	}
 
 	protected void addPic(){
@@ -111,31 +118,47 @@ public class PicturesActivity extends ListActivity implements OnItemClickListene
 		switch(requestCode) {
 		case REQUEST_CODE_ADD_PIC:
 			if(resultCode == RESULT_OK){
-				Uri uri = intent.getData();
-				String comment = intent.getStringExtra(AddPictureActivity.EXTRA_COMMENT);
-				Toast.makeText(this, 
-							   "URL: " + uri + "\nComment: " + comment, 
-							   Toast.LENGTH_SHORT).show();
+				String url = intent.getStringExtra(AddPictureActivity.EXTRA_URL);
+				String thumbUrl = intent.getStringExtra(AddPictureActivity.EXTRA_THUMB_URL);
+				String caption = intent.getStringExtra(AddPictureActivity.EXTRA_CAPTION);
+				try{
+					PartyProp prop = JunctionService.getProp();
+					String userId = JunctionService.getUserId();
+					long time = (new Date()).getTime();
+					prop.addImage(userId, url, thumbUrl, caption, time);
+				}
+				catch(IllegalStateException e){
+					toastShort("Failed to get info from service! See debug log.");
+					e.printStackTrace(System.err);
+				}
+				
 			}
 			break;
 		}
 	}
 
 	private void refresh(){
+		try{
+			PartyProp prop = JunctionService.getProp();
+			List<JSONObject> images = prop.getImages();
+			refreshImages(images);
+		}
+		catch(IllegalStateException e){
+			toastShort("Failed to get info from service! See debug log.");
+			e.printStackTrace(System.err);
+		}
 	}
 
-	private void refreshAdverts(Set<JSONObject> adverts){
+	private void refreshImages(List<JSONObject> images){
 		mPics.setNotifyOnChange(false);
 		mPics.clear();
-		for(JSONObject a : adverts){
-			JSONObject advert = new JSONObjWrapper(a){
-					public String toString(){ 
-						String name = optString("name");
-						Date d = new Date(optLong("time"));
-						return  name + " - " + dateFormat.format(d); 
+		for(JSONObject a : images){
+			JSONObject image = new JSONObjWrapper(a){
+					public String toString(){
+						return optString("caption"); 
 					}
 				};
-			mPics.add(advert);
+			mPics.add(image);
 		}
 		mPics.setNotifyOnChange(true);
 		mPics.notifyDataSetChanged();

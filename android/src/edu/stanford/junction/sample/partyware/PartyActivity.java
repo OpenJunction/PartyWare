@@ -33,7 +33,7 @@ import java.util.*;
 import java.text.DateFormat;
 
 
-public class PartyActivity extends Activity{
+public class PartyActivity extends RichActivity{
 
 	public final static int REQUEST_CODE_SCAN_URL = 0;
 

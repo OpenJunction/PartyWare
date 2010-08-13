@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender.SendIntentException;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -27,7 +28,7 @@ import android.os.Message;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.net.Uri;
+
 
 import edu.stanford.junction.android.AndroidJunctionMaker;
 import edu.stanford.junction.Junction;
@@ -45,8 +46,16 @@ public class JunctionService extends Service {
     private Junction jx;
     private PartyProp partyProp;
     private Thread connectionThread;
+    private String userId;
 
     private static JunctionService instance;
+
+	public static JunctionService getService() {
+		if (instance == null) {
+			throw new IllegalStateException("Could not get party prop instance!");
+		}
+		return instance;
+	}
     
 	public static PartyProp getProp() {
 		if (instance == null || instance.partyProp == null) {
@@ -60,6 +69,10 @@ public class JunctionService extends Service {
 			throw new IllegalStateException("Could not get service instance!");
 		}
 		instance.initJunction(uri);
+	}
+
+	public static String getUserId(){
+		return (getService()).userId;
 	}
 
 	// Called once on initial creation
@@ -78,6 +91,10 @@ public class JunctionService extends Service {
 	// Called for each call to Context.startService
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		Bundle extras = intent.getExtras();
+		if(extras !=null){
+			userId = extras.getString("userId");
+		}
 		// We want this service to continue running until it is explicitly
 		// stopped, so return sticky.
 		return START_STICKY;

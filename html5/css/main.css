@@ -9,5 +9,6 @@ h1{
 .timelineImage {
     border: 1px solid #999999;
     margin: 20px 20px 20px 20px;
+    height: 400;
 }
 

@@ -14,26 +14,12 @@
       android:gravity="center_vertical"
       >
     <Button
-	android:id="@+id/use_camera_button"
-	android:layout_width="100dip"
-	android:layout_height="50dip"
-	android:text="Use Camera"
-	/> 
-    <Button
-	android:id="@+id/pick_from_library_button"
+	android:id="@+id/find_video_button"
 	android:layout_width="100dip"
 	android:layout_height="50dip"
 	android:text="Pick from Library"
 	/>    
   </LinearLayout>
-
-  <ImageView
-      android:id="@+id/preview"
-      android:src = "@drawable/launcher_icon"
-      android:layout_width="100dip"
-      android:layout_height="100dip"
-      android:layout_margin="10dip"
-      />
 
   <TextView       
       android:id="@+id/uri_view"

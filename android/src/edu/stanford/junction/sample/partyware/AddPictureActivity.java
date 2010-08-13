@@ -33,9 +33,11 @@ import java.io.*;
 import java.util.*;
 
 
-public class AddPictureActivity extends Activity{
+public class AddPictureActivity extends RichActivity{
 
-	public final static String EXTRA_COMMENT = "edu.stanford.junction.sample.partyware.IMAGE_COMMENT";
+	public final static String EXTRA_CAPTION = "edu.stanford.junction.sample.partyware.IMAGE_CAPTION";
+	public final static String EXTRA_URL = "edu.stanford.junction.sample.partyware.IMAGE_URL";
+	public final static String EXTRA_THUMB_URL = "edu.stanford.junction.sample.partyware.THUMB_URL";
 	public final static String LAUNCH_INTENT = "edu.stanford.junction.sample.partyware.ADD_PICTURE";
 
 	public final static int REQUEST_CODE_PICK_FROM_LIBRARY = 0;
@@ -44,6 +46,7 @@ public class AddPictureActivity extends Activity{
 	private ImageView mPreviewImage;
 	private TextView mUriView;
 	private Uri mUri;
+	private Uri mThumbUri;
 	private ProgressDialog mUploadProgressDialog;
 	private BroadcastReceiver mUriReceiver;
 	private BroadcastReceiver mErrorReceiver;
@@ -55,9 +58,9 @@ public class AddPictureActivity extends Activity{
 		mPreviewImage = (ImageView)findViewById(R.id.preview);
 		mPreviewImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
-		EditText txt = (EditText)findViewById(R.id.comment_text);
+		EditText txt = (EditText)findViewById(R.id.caption_text);
 		txt.setHint(R.string.add_caption);
-		String comment = txt.getText().toString();
+		String caption = txt.getText().toString();
 
 		mUriView = (TextView)findViewById(R.id.uri_view);
 
@@ -116,6 +119,7 @@ public class AddPictureActivity extends Activity{
 				public void onReceive(Context context, Intent intent) {
 					mUploadProgressDialog.dismiss();
 					mUri = Uri.parse(intent.getStringExtra("image_url"));
+					mThumbUri = Uri.parse(intent.getStringExtra("thumb_url"));
 					mUriView.setText(mUri.toString());
 				}
 			};
@@ -184,16 +188,8 @@ public class AddPictureActivity extends Activity{
 	}
 
 
-	private void showDialog(String message) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(message);
-		builder.setPositiveButton("OK", null);
-		builder.show();
-	}
-
-
     protected void confirm(){
-		if(mUri == null){
+		if(mUri == null || mThumbUri == null){
 			Toast.makeText(this, R.string.no_image_selected, 
 						   Toast.LENGTH_SHORT).show();
 		}
@@ -202,12 +198,13 @@ public class AddPictureActivity extends Activity{
 			Intent i = new Intent(this, ImgurUploadService.class);
 			stopService(i);
 
-			// return the uri with comment
+			// return the uri with caption
 			Intent intent = new Intent();
-			EditText txt = (EditText)findViewById(R.id.comment_text);
-			String comment = txt.getText().toString();
-			intent.setData(mUri);
-			intent.putExtra(EXTRA_COMMENT, comment);
+			EditText txt = (EditText)findViewById(R.id.caption_text);
+			String caption = txt.getText().toString();
+			intent.putExtra(EXTRA_URL, mUri.toString());
+			intent.putExtra(EXTRA_THUMB_URL, mThumbUri.toString());
+			intent.putExtra(EXTRA_CAPTION, caption);
 			setResult(RESULT_OK, intent);
 
 			finish();

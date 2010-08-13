@@ -21,8 +21,8 @@ var PartyWare =
 
 					 modelChanged: function(){
 						 var self = this;
-						 $("#timeline").children.remove();
-						 this.model.eachItemInTimeline(
+						 $("#timeline").children().remove();
+						 this.model.eachObject(
 							 function(item){
 								 self.appendItem(item);
 							 });
@@ -30,12 +30,12 @@ var PartyWare =
 
 					 appendItem: function(item){
 						 if(item.type == "image"){
-							 $("#timeline").append(
+							 var div = $("<div/>").append(
 								 $('<img/>').attr(
 									 {
 										 src: item.url
 									 }).addClass("timelineImage"));
-
+							 $("#timeline").append(div);
 						 }
 						 else if(item.type == "youtube"){
 							 

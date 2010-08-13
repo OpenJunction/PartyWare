@@ -266,11 +266,16 @@ var JunctionProps = new (
 							break;
 						}
 						case this.MSG_HELLO:{
-							this.logInfo("Got HELLO.");
-							if(!this.isSelfMsg(msg) && 
-							   msg.localSeqNum > this.sequenceNum) {
-								this.enterSYNCMode();
+							if(this.isSelfMsg(msg)){
+								this.logInfo("Got self HELLO.");
 							}
+							else{
+								this.logInfo("Got peer HELLO.");
+								if(msg.localSeqNum > this.sequenceNum) {
+									this.enterSYNCMode();
+								}
+							}
+
 							break;
 						}
 						case this.MSG_WHO_HAS_STATE: {

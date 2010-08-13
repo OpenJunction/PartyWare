@@ -57,6 +57,7 @@ public class MainActivity extends TabActivity{
 
 		// Create an Intent to launch an Activity for the tab (to be reused)
 		intent = new Intent().setClass(this, PartyActivity.class);
+
 		// Initialize a TabSpec for each tab and add it to the TabHost
 		spec = tabHost.newTabSpec("party").setIndicator(
 			"Party",
@@ -80,6 +81,7 @@ public class MainActivity extends TabActivity{
 
 		// Start the junction service
 		Intent i = new Intent(this, JunctionService.class);
+		i.putExtra("userId", (UUID.randomUUID()).toString());
 		startService(i);
 	}
 

@@ -136,6 +136,9 @@ public class ImgurUploadService extends Service {
             resultIntent.putExtra("image_url", mImgurResponse
 								  .get("original"));
 
+            resultIntent.putExtra("thumb_url", mImgurResponse
+								  .get("small_thumbnail"));
+
             resultIntent.putExtra("delete_hash", mImgurResponse
 								  .get("delete_hash"));
 
