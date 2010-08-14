@@ -2,13 +2,64 @@ body{
     background-color: #000000;
 }
 
-h1{ 
+h1,h2,h3,p{ 
     color: #ffffff;
 }
 
-.timelineImage {
-    border: 1px solid #999999;
-    margin: 20px 20px 20px 20px;
-    height: 400;
+#layoutTable{
+    width: 100%
 }
+
+#layoutTable td{
+    padding: 10px 10px 10px 10px;
+    border: 1px solid #555555;
+    width: 50%;
+    vertical-align: top;
+}
+
+#playlistView, #picturesView{
+    padding: 10px 10px 10px 10px;
+}
+
+#playlistCell {
+    text-align: center;
+}
+
+#playlist .youtubeItem{ 
+    cursor: pointer;
+    text-align: left;
+    margin-bottom: 10px;
+}
+
+#playlist .youtubeItem p{ 
+}
+
+#playlist .youtubeItem img {
+    margin-right: 20px;
+    height: 70px;
+    float: left;
+}
+
+
+#pictures{ 
+    text-align: center;
+}
+
+#pictures td{ 
+    width: 100px;
+    height: 100px;
+    border: none;
+    text-align: center;
+}
+
+#pictures img {
+    border: 1px solid #999999;
+    height: 100px;
+    cursor: pointer;
+}
+
+
+
+
+
 

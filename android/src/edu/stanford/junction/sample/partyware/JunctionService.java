@@ -91,9 +91,11 @@ public class JunctionService extends Service {
 	// Called for each call to Context.startService
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Bundle extras = intent.getExtras();
-		if(extras !=null){
-			userId = extras.getString("userId");
+		if(intent != null){
+			Bundle extras = intent.getExtras();
+			if(extras !=null){
+				userId = extras.getString("userId");
+			}
 		}
 		// We want this service to continue running until it is explicitly
 		// stopped, so return sticky.

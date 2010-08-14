@@ -70,6 +70,16 @@
     </activity>
 
 
+    <activity android:name="edu.stanford.junction.sample.partyware.ImageViewerActivity"
+	      android:label="@string/view_picture"
+	      android:screenOrientation="portrait">
+      <intent-filter>
+	<action android:name="edu.stanford.junction.sample.partyware.VIEW_PICTURE" />
+	<category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </activity>
+
+
     <activity android:name="edu.stanford.junction.sample.partyware.AddYoutubeVideoActivity"
 	      android:label="@string/add_video"
 	      android:screenOrientation="portrait">

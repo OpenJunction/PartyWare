@@ -17,30 +17,88 @@ var PartyWare =
 														onChange: function(o){
 															self.modelChanged();
 														}});
-					 },
 
-					 modelChanged: function(){
-						 var self = this;
-						 $("#timeline").children().remove();
-						 this.model.eachObject(
-							 function(item){
-								 self.appendItem(item);
+						 $("#picInputButton").click(
+							 function(){
+								 var url = $("#picInput").val();
+								 self.model.addPicture(self.userId, url, url, "..from web..");
+							 });
+
+						 $("#youtubeInputButton").click(
+							 function(){
+								 var videoId = $("#youtubeInput").val();
+								 self.model.addYoutube(
+									 self.userId, videoId,
+									 "http://blogs.wyomingnews.com/blogs/backstagepass/files/2009/09/youtube_logo.jpg", 
+									 "..from web..");
 							 });
 					 },
 
-					 appendItem: function(item){
-						 if(item.type == "image"){
-							 var div = $("<div/>").append(
-								 $('<img/>').attr(
-									 {
-										 src: item.url
-									 }).addClass("timelineImage"));
-							 $("#timeline").append(div);
+					 userId: randomUUID(),
+
+					 modelChanged: function(){
+						 var self = this;
+						 var i,div;
+						 $("#pictures").children().remove();
+						 var pics = this.model.getPictures();
+						 var table = this.buildTable(
+							 pics, 5, 
+							 function(ea,cell){
+								 div = $("<div/>");
+								 var img = $('<img/>').attr({src: ea.url});
+								 $(div).append(img);
+								 $(div).append($('<p/>').text("\'" + ea.caption + "\'"));
+								 $(img).click(
+									 function(){
+										 Shadowbox.open(
+											 {
+												 player: "img",
+												 content: ea.url
+											 });
+									 });
+
+								 $(cell).append(div);
+							 });
+						 $("#pictures").append(table);
+
+						 $("#playlist").children().remove();
+						 var vids = this.model.getPlaylist();
+						 for(i = 0; i < vids.length; i++){
+							 var ea = vids[i];
+							 div = $("<div/>").addClass("youtubeItem");
+							 var img = $('<img/>').attr({src: ea.thumbUrl});
+							 $(div).append(img);
+							 $(div).append($('<p/>').text("\'" + ea.caption + "\'"));
+							 $(img).click(
+								 function(){
+									 loadNewVideo(ea.videoId, 0);
+								 });
+							 $("#playlist").append(div);
 						 }
-						 else if(item.type == "youtube"){
-							 
+					 },
+
+					 buildTable: function(items, numCols, iter){
+						 var table = $("<table/>");
+						 var numRows = Math.ceil(items.length / numCols);
+						 for(var r = 0; r < numRows; r++){
+							 var row = $("<tr/>");
+							 var c = 0;
+							 for(c = 0; c < numCols; c++){
+								 var index = numCols * r + c;
+								 if(index >= items.length){
+									 break;
+								 }
+								 var cell = $("<td/>");
+								 $(row).append(cell);
+								 iter(items[index], cell);
+							 }
+							 if(c > 0){
+								 $(table).append(row);
+							 }
 						 }
+						 return table;
 					 }
+
 
 				 });
 

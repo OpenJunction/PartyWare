@@ -1,5 +1,7 @@
 package edu.stanford.junction.sample.partyware;
 
+import edu.stanford.junction.sample.partyware.util.BitmapManager;
+
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -8,18 +10,23 @@ import android.content.Context;
 import android.content.ServiceConnection;
 import android.content.Intent;
 import android.content.ComponentName;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.IBinder;
-import android.os.Handler;
-import android.os.Message;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.LayoutInflater;
 import android.widget.Button;
+import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ArrayAdapter;
+import android.widget.Gallery;
+import android.widget.ImageView;
+import android.widget.BaseAdapter;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView;
 
@@ -29,29 +36,27 @@ import edu.stanford.junction.props2.IPropChangeListener;
 
 import org.json.JSONObject;
 
-import java.net.URI;
+import java.net.*;
+import java.io.*;
 import java.util.*;
 import java.text.DateFormat;
 
 
+
 public class PicturesActivity extends RichListActivity implements OnItemClickListener{
 
-    private Handler mMainHandler;
-    private ArrayAdapter<JSONObject> mPics;
-
 	public final static int REQUEST_CODE_ADD_PIC = 0;
-
-	private final DateFormat dateFormat = DateFormat.getDateTimeInstance();
+	private ImageAdapter mPics;
+	private final DateFormat dateFormat = DateFormat.getTimeInstance();
 
     public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.pictures);
 
-		mPics = new ArrayAdapter<JSONObject>(
-			this, 
-			android.R.layout.simple_list_item_1,
-			new ArrayList<JSONObject>());
+		mPics = new ImageAdapter(this, 
+								 R.layout.picture_item, 
+								 new ArrayList<JSONObject>());
 		setListAdapter(mPics);
 		getListView().setTextFilterEnabled(true);
 		getListView().setOnItemClickListener(this); 
@@ -83,34 +88,21 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 			toastShort("Failed to get info from service! See debug log.");
 			e.printStackTrace(System.err);
 		}
-
 		refresh();
+	}
+
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id){
+		JSONObject o = mPics.getItem(position);
+		Intent intent = new Intent();
+		intent.setAction(ImageViewerActivity.LAUNCH_INTENT);
+		String url = o.optString("url");
+		intent.putExtra("image_url", url);
+		startActivity(intent);
 	}
 
 	protected void addPic(){
 		Intent intent = new Intent(AddPictureActivity.LAUNCH_INTENT);
 		startActivityForResult(intent, REQUEST_CODE_ADD_PIC);
-	}
-
-	private JSONObject randomTestObj(){
-		try{
-			JSONObject o = new JSONObject();
-			o.put("name", "dudeface");
-			o.put("time", (new Date()).getTime());
-			return o;
-		}
-		catch(Exception e){
-			return new JSONObject();
-		}
-	}
-
-	public void onItemClick(AdapterView parent, View v, int position, long id){
-		// Intent intent = new Intent();
-		// JSONObject advert = (JSONObject)mPics.getItem(position);
-		// String url = advert.optString("url");
-		// intent.putExtra(WhiteboardIntents.EXTRA_SESSION_URL, url);
-		// setResult(RESULT_OK, intent);
-		// finish();
 	}
 
 	@Override
@@ -153,12 +145,7 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 		mPics.setNotifyOnChange(false);
 		mPics.clear();
 		for(JSONObject a : images){
-			JSONObject image = new JSONObjWrapper(a){
-					public String toString(){
-						return optString("caption"); 
-					}
-				};
-			mPics.add(image);
+			mPics.add(a);
 		}
 		mPics.setNotifyOnChange(true);
 		mPics.notifyDataSetChanged();
@@ -168,6 +155,56 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 	public void onDestroy(){
 		super.onDestroy();
 	}
+
+	class ImageAdapter extends ArrayAdapter<JSONObject> {
+
+		BitmapManager mgr = new BitmapManager(10);
+
+		public ImageAdapter(Context context, int resource, List<JSONObject> objects){
+			super(context, resource, objects);
+		}
+
+		/** 
+		 *  Returns a new ImageView to be displayed, depending on 
+		 *	the position passed. 
+		 */
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View v = convertView;
+			if (v == null) {
+				LayoutInflater vi = (LayoutInflater)getSystemService(
+					Context.LAYOUT_INFLATER_SERVICE);
+				v = vi.inflate(R.layout.picture_item, null);
+			}
+			JSONObject o = getItem(position);
+			if (o != null) {
+				TextView tt = (TextView) v.findViewById(R.id.toptext);
+				String caption = o.optString("caption");
+				tt.setText(caption);
+
+				Date d = new Date(o.optLong("time"));
+				String time = dateFormat.format(d); 
+				TextView bt = (TextView) v.findViewById(R.id.bottomtext);
+				bt.setText(" " + time);
+
+				ImageView icon = (ImageView)v.findViewById(R.id.icon);
+				String url = o.optString("thumbUrl");
+				Bitmap bm = mgr.getBitmap(url);
+				if(bm == null){
+					icon.setImageResource(R.drawable.shopper_icon);
+				}
+				else{
+					icon.setImageBitmap(bm);
+				}
+				icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+			}
+			return v;
+
+		}
+
+
+	}
+
 
 }
 

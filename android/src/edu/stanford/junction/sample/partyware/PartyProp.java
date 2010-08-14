@@ -175,7 +175,16 @@ public class PartyProp extends Prop {
 					images.add(ea);
 				}
 			}
+			sortByTime(images);
 			return Collections.unmodifiableList(images);
+		}
+
+		private void sortByTime(List<JSONObject> input){
+			Collections.sort(input, new Comparator<JSONObject>(){
+					public int compare(JSONObject o1, JSONObject o2) {
+						return (int)(o2.optLong("time") - o1.optLong("time"));
+					}
+				});
 		}
 
 
@@ -189,6 +198,7 @@ public class PartyProp extends Prop {
 					vids.add(ea);
 				}
 			}
+			sortByTime(vids);
 			return Collections.unmodifiableList(vids);
 		}
 

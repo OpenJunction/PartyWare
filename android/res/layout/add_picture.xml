@@ -27,14 +27,6 @@
 	/>    
   </LinearLayout>
 
-  <ImageView
-      android:id="@+id/preview"
-      android:src = "@drawable/launcher_icon"
-      android:layout_width="100dip"
-      android:layout_height="100dip"
-      android:layout_margin="10dip"
-      />
-
   <TextView       
       android:id="@+id/uri_view"
       android:layout_width="fill_parent"

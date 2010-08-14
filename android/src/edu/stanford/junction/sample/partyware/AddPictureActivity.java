@@ -14,6 +14,8 @@ import android.app.Service;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.graphics.PixelFormat;
+import android.hardware.Camera;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,7 +45,6 @@ public class AddPictureActivity extends RichActivity{
 	public final static int REQUEST_CODE_PICK_FROM_LIBRARY = 0;
 	public final static int REQUEST_CODE_TAKE_PICTURE = 1;
 
-	private ImageView mPreviewImage;
 	private TextView mUriView;
 	private Uri mUri;
 	private Uri mThumbUri;
@@ -54,9 +55,6 @@ public class AddPictureActivity extends RichActivity{
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.add_picture);
-
-		mPreviewImage = (ImageView)findViewById(R.id.preview);
-		mPreviewImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
 		EditText txt = (EditText)findViewById(R.id.caption_text);
 		txt.setHint(R.string.add_caption);
@@ -94,6 +92,14 @@ public class AddPictureActivity extends RichActivity{
 	}
 
 	protected void takePicture(){
+
+		Camera camera = Camera.open();
+		Camera.Parameters parameters = camera.getParameters();
+		parameters.setPictureFormat(PixelFormat.JPEG); 
+		parameters.setPictureSize(800, 600);
+		camera.setParameters(parameters);
+		camera.release();
+
 		Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
 		if (Misc.hasImageCaptureBug()) {
 			i.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, 
@@ -154,7 +160,6 @@ public class AddPictureActivity extends RichActivity{
 		case REQUEST_CODE_PICK_FROM_LIBRARY:
 			if(resultCode == RESULT_OK){
 				Uri localUri = data.getData();
-				mPreviewImage.setImageURI(localUri);
 				startUpload(localUri);
 			}
 			break;
@@ -171,14 +176,12 @@ public class AddPictureActivity extends RichActivity{
 						if (!fi.delete()) {
 							Log.i("AddPictureActivity", "Failed to delete " + fi);
 						}
-						mPreviewImage.setImageURI(localUri);
 						startUpload(localUri);
 					} catch (FileNotFoundException e) {
 						e.printStackTrace();
 					}
 				} else {
 					localUri = data.getData();
-					mPreviewImage.setImageURI(localUri);
 					startUpload(localUri);
                 }
 				

@@ -25,24 +25,77 @@
 
     <script type="text/javascript" src="js/party_ware.js"></script>
 
+    <script type="text/javascript" src="js/shadowbox.js"></script>
+
+    <script type="text/javascript" src="js/youtube.js"></script>
+
     <link rel="stylesheet" href="css/main.css" type="text/css"/>
+
+    <link rel="stylesheet" type="text/css" href="css/shadowbox.css">
+
+    <script type="text/javascript">
+      Shadowbox.init();
+    </script>
+
+    <script src="http://www.google.com/jsapi"></script>
+    <script>
+      google.load("swfobject", "2.1");
+    </script>
+
 
   </head>
 
   <body>
-    <center> 
+    <h1>PartyWare</h1>
 
-      <h1>PartyWare</h1>
+    <table id="layoutTable">
+      <tr>
+	<td>
+	  <h2>Pictures</h2>
+	  <div id="picturesView">
+	    <div id="pictures">
+	    </div>
+	  </div>
+	</td>
+	<td id="playlistCell">
+	  <h2>Youtube Playlist</h2>
+	  <!-- embed the player -->
+	  <div id="ytapiplayer">
+	    You need Flash player 8+ and JavaScript enabled to view this video.
+	  </div>
 
-      <div id="timeline">
-	
-      </div>
+	  <script type="text/javascript">
+	    // <![CDATA[
+      // allowScriptAccess must be set to allow the Javascript from one 
+      // domain to access the swf on the youtube domain
+      var params = { allowScriptAccess: "always", bgcolor: "#cccccc" };
+      // this sets the id of the object or embed tag to 'myytplayer'.
+      // You then use this id to access the swf and make calls to the player's API
+      var atts = { id: "myytplayer" };
+      swfobject.embedSWF("http://www.youtube.com/v/PH54cp2ggFk?border=0&amp;enablejsapi=1&version=3&playerapiid=ytplayer&showinfo=0&hd=1",
+                         "ytapiplayer", "425", "344", "8", null, null, params, atts);
+      //]]>
+	  </script>
 
-      <div>
-	<a href="#" id="permalink">permalink</a>
-      </div>
+	  <div id="playlistView">
+	    <div id="playlist">
+	    </div>
+	  </div>
+	</td>
+      </tr>
+    </table>
 
-    </center>
+    <div>
+      <a href="#" id="permalink">permalink</a>
+    </div>
+
+    <div id="controls">
+      <input id="picInput" type="text"/>
+      <input id="picInputButton" type="submit" value="Add Picture by URL"></input>
+      <br/><br/>
+      <input id="youtubeInput" type="text"/>
+      <input id="youtubeInputButton" type="submit" value="Add Youtube by Id"></input>
+    </div>
 
     <script type="text/javascript">
       PartyWare.init();
