@@ -63,19 +63,27 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 				}
 			});
 
+		final Handler refreshHandler = new Handler(){
+				@Override
+				public void handleMessage(Message msg) {
+					super.handleMessage(msg);
+					refresh();
+				}
+			};
+
 		try{
 			Prop prop = JunctionService.getProp();
 			prop.addChangeListener(new IPropChangeListener(){
 					public String getType(){ return Prop.EVT_CHANGE; }
 					public void onChange(Object data){
-						refresh();
+						refreshHandler.sendEmptyMessage(0);
 					}
 				});
 
 			prop.addChangeListener(new IPropChangeListener(){
 					public String getType(){ return Prop.EVT_SYNC; }
 					public void onChange(Object data){
-						refresh();
+						refreshHandler.sendEmptyMessage(0);
 					}
 				});
 		}
