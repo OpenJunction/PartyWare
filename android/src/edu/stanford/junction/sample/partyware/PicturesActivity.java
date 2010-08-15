@@ -15,6 +15,8 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.Bundle;
+import android.os.Message;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -68,19 +70,28 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 				}
 			});
 
+
+		final Handler refreshHandler = new Handler(){
+				@Override
+				public void handleMessage(Message msg) {
+					super.handleMessage(msg);
+					refresh();
+				}
+			};
+
 		try{
 			Prop prop = JunctionService.getProp();
 			prop.addChangeListener(new IPropChangeListener(){
 					public String getType(){ return Prop.EVT_CHANGE; }
 					public void onChange(Object data){
-						refresh();
+						refreshHandler.sendEmptyMessage(0);
 					}
 				});
 
 			prop.addChangeListener(new IPropChangeListener(){
 					public String getType(){ return Prop.EVT_SYNC; }
 					public void onChange(Object data){
-						refresh();
+						refreshHandler.sendEmptyMessage(0);
 					}
 				});
 		}
@@ -131,6 +142,7 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 
 	private void refresh(){
 		try{
+			toastShort("Refreshing....");
 			PartyProp prop = JunctionService.getProp();
 			List<JSONObject> images = prop.getImages();
 			refreshImages(images);
@@ -142,13 +154,10 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 	}
 
 	private void refreshImages(List<JSONObject> images){
-		mPics.setNotifyOnChange(false);
 		mPics.clear();
 		for(JSONObject a : images){
 			mPics.add(a);
 		}
-		mPics.setNotifyOnChange(true);
-		mPics.notifyDataSetChanged();
 	}
 
 
