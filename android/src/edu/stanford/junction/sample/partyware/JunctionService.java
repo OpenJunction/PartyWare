@@ -106,7 +106,11 @@ public class JunctionService extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 		if(jxActor != null){
-			jxActor.leave();
+			try{
+				jxActor.leave();
+			}catch(IllegalStateException e){
+				// We were'nt connected
+			}
 		}
 		if(connectionThread != null){
 			connectionThread.interrupt();
@@ -135,7 +139,11 @@ public class JunctionService extends Service {
 				public void run(){
 
 					if(jxActor != null){
-						jxActor.leave();
+						try{
+							jxActor.leave();
+						}catch(IllegalStateException e){
+							// We were'nt connected
+						}
 					}
 
 					JunctionActor actor = new JunctionActor("participant") {

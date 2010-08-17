@@ -5,6 +5,8 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.pm.ResolveInfo;
+import android.content.pm.PackageManager;
 import android.content.ServiceConnection;
 import android.content.Intent;
 import android.content.ComponentName;
@@ -37,7 +39,7 @@ import java.text.DateFormat;
 public class YoutubePlaylistActivity extends RichListActivity implements OnItemClickListener{
 
     private Handler mMainHandler;
-    private ArrayAdapter<JSONObject> mVideos;
+    private ArrayAdapter<JSONObject> mVids;
 
 	public final static int REQUEST_CODE_ADD_VIDEO = 0;
 
@@ -48,11 +50,11 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 
 		setContentView(R.layout.youtube);
 
-		mVideos = new ArrayAdapter<JSONObject>(
+		mVids = new ArrayAdapter<JSONObject>(
 			this, 
 			android.R.layout.simple_list_item_1,
 			new ArrayList<JSONObject>());
-		setListAdapter(mVideos);
+		setListAdapter(mVids);
 		getListView().setTextFilterEnabled(true);
 		getListView().setOnItemClickListener(this); 
 
@@ -96,38 +98,34 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 	}
 
 	protected void addVideo(){
-		Intent intent = new Intent(AddYoutubeVideoActivity.LAUNCH_INTENT);
+		Intent intent = new Intent(YoutubeSearchActivity.LAUNCH_INTENT);
 		startActivityForResult(intent, REQUEST_CODE_ADD_VIDEO);
 	}
 
-	private JSONObject randomTestObj(){
-		try{
-			JSONObject o = new JSONObject();
-			o.put("name", "dudeface");
-			o.put("time", (new Date()).getTime());
-			return o;
-		}
-		catch(Exception e){
-			return new JSONObject();
+
+	public void onItemClick(AdapterView parent, View v, int position, long id){
+		JSONObject o = mVids.getItem(position);
+		String videoId = o.optString("videoId");
+		Intent i =  new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:"  + videoId));
+		List<ResolveInfo> list = getPackageManager().queryIntentActivities(
+			i, PackageManager.MATCH_DEFAULT_ONLY);
+		if(list.size() > 0) {
+
+		} 
+		else{
+			toastShort("Youtube player not available!");
 		}
 	}
 
-	public void onItemClick(AdapterView parent, View v, int position, long id){
-		// Intent intent = new Intent();
-		// JSONObject advert = (JSONObject)mVideos.getItem(position);
-		// String url = advert.optString("url");
-		// intent.putExtra(WhiteboardIntents.EXTRA_SESSION_URL, url);
-		// setResult(RESULT_OK, intent);
-		// finish();
-	}
+
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		switch(requestCode) {
 		case REQUEST_CODE_ADD_VIDEO:
 			if(resultCode == RESULT_OK){
-				String caption = intent.getStringExtra(AddYoutubeVideoActivity.EXTRA_CAPTION);
-				String videoId = intent.getStringExtra(AddYoutubeVideoActivity.EXTRA_VIDEO_ID);
+				String caption = intent.getStringExtra("title");
+				String videoId = intent.getStringExtra("video_id");
 				try{
 					PartyProp prop = JunctionService.getProp();
 					String userId = JunctionService.getUserId();
@@ -138,7 +136,6 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 					toastShort("Failed to get info from service! See debug log.");
 					e.printStackTrace(System.err);
 				}
-				
 			}
 			break;
 		}
@@ -157,18 +154,18 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 	}
 
 	private void refreshVideos(List<JSONObject> videos){
-		mVideos.setNotifyOnChange(false);
-		mVideos.clear();
+		mVids.setNotifyOnChange(false);
+		mVids.clear();
 		for(JSONObject a : videos){
 			JSONObject video = new JSONObjWrapper(a){
 					public String toString(){
 						return optString("caption"); 
 					}
 				};
-			mVideos.add(video);
+			mVids.add(video);
 		}
-		mVideos.setNotifyOnChange(true);
-		mVideos.notifyDataSetChanged();
+		mVids.setNotifyOnChange(true);
+		mVids.notifyDataSetChanged();
 	}
 
 

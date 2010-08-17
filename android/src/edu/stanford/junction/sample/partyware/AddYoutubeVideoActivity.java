@@ -34,13 +34,12 @@ import java.util.*;
 public class AddYoutubeVideoActivity extends RichActivity{
 
 	public final static String EXTRA_CAPTION = "edu.stanford.junction.sample.partyware.CAPTION";
-	public final static String EXTRA_VIDEO_ID = "edu.stanford.junction.sample.partyware.VIDEO_ID";
 	public final static String LAUNCH_INTENT = "edu.stanford.junction.sample.partyware.ADD_VIDEO";
 
-	public final static int REQUEST_CODE_PICK_FROM_LIBRARY = 0;
+	public final static int REQUEST_CODE_SEARCH_YOUTUBE = 0;
 
-	private TextView mUriView;
-	private String mVideoId;
+	private TextView mTitleView;
+	private Intent mVid;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -50,12 +49,12 @@ public class AddYoutubeVideoActivity extends RichActivity{
 		txt.setHint(R.string.add_caption);
 		String caption = txt.getText().toString();
 
-		mUriView = (TextView)findViewById(R.id.uri_view);
+		mTitleView = (TextView)findViewById(R.id.uri_view);
 
 		Button button = (Button)findViewById(R.id.find_video_button);
 		button.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
-					pickFromLibrary();
+					searchYoutube();
 				}
 			});
 
@@ -74,41 +73,34 @@ public class AddYoutubeVideoActivity extends RichActivity{
 			});
 	}
 
-
-	protected void pickFromLibrary(){
-		// Intent i = new Intent(Intent.ACTION_PICK, 
-		// 					  android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-		// startActivityForResult(i, REQUEST_CODE_PICK_FROM_LIBRARY);
-
-		mVideoId = "lksjdfdf";
+	protected void searchYoutube(){
+		Intent intent = new Intent(YoutubeSearchActivity.LAUNCH_INTENT);
+		startActivityForResult(intent, REQUEST_CODE_SEARCH_YOUTUBE);
 	}
-
-
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		switch(requestCode) {
-		case REQUEST_CODE_PICK_FROM_LIBRARY:
+		case REQUEST_CODE_SEARCH_YOUTUBE:
 			if(resultCode == RESULT_OK){
-				// do stuff here
+				mVid = data;
+				mTitleView.setText(data.getStringExtra("title"));
 			}
 			break;
 		}
 	}
 
-
 	protected void confirm(){
-		if(mVideoId == null){
+		if(mVid == null){
 			toastShort(R.string.no_video_selected);
 		}
 		else{
-			// return the video id with caption
-			Intent intent = new Intent();
 			EditText txt = (EditText)findViewById(R.id.caption_text);
 			String caption = txt.getText().toString();
+
+			Intent intent = mVid;
 			intent.putExtra(EXTRA_CAPTION, caption);
-			intent.putExtra(EXTRA_VIDEO_ID, mVideoId);
 			setResult(RESULT_OK, intent);
 			finish();
 		}

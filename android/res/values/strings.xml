@@ -18,6 +18,7 @@
   <string name="app_name">PartyWare</string>
   <string name="add_picture">Add Picture to Party</string>
   <string name="view_picture">View Picture</string>
+  <string name="search_youtube">Search Youtube</string>
   <string name="add_video">Add Video to Party Playlist</string>
   <string name="starting_image_upload">Uploading Image...</string>
   <string name="no_image_selected">No Image Selected!</string>

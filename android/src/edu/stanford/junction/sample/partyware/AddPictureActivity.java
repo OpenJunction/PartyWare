@@ -37,7 +37,7 @@ import java.util.*;
 
 public class AddPictureActivity extends RichActivity{
 
-	public final static String EXTRA_CAPTION = "edu.stanford.junction.sample.partyware.IMAGE_CAPTION";
+	public final static String EXTRA_CAPTION = "edu.stanford.junction.sample.partyware.CAPTION";
 	public final static String EXTRA_URL = "edu.stanford.junction.sample.partyware.IMAGE_URL";
 	public final static String EXTRA_THUMB_URL = "edu.stanford.junction.sample.partyware.THUMB_URL";
 	public final static String LAUNCH_INTENT = "edu.stanford.junction.sample.partyware.ADD_PICTURE";

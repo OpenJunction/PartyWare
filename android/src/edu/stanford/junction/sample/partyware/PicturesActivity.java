@@ -142,7 +142,6 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 
 	private void refresh(){
 		try{
-			toastShort("Refreshing....");
 			PartyProp prop = JunctionService.getProp();
 			List<JSONObject> images = prop.getImages();
 			refreshImages(images);

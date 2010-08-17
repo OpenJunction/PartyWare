@@ -56,7 +56,7 @@ public class BitmapManager{
 				return newBm;
 			}
 			catch(IOException e){
-				e.printStackTrace(System.err);
+				System.err.println("Failed to get bitmap:" + url);
 				return null;
 			}
 		}

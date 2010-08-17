@@ -69,6 +69,14 @@
       </intent-filter>
     </activity>
 
+    <activity android:name="edu.stanford.junction.sample.partyware.YoutubeSearchActivity"
+	      android:label="@string/search_youtube"
+	      android:screenOrientation="portrait">
+      <intent-filter>
+	<action android:name="edu.stanford.junction.sample.partyware.YOUTUBE_SEARCH" />
+	<category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </activity>
 
     <activity android:name="edu.stanford.junction.sample.partyware.ImageViewerActivity"
 	      android:label="@string/view_picture"
