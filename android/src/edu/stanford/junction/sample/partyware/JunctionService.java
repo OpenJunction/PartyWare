@@ -48,6 +48,7 @@ public class JunctionService extends Service {
     private Thread connectionThread;
     private String userId;
     private NotificationManager mNotificationManager;
+    private Handler mHandler = new Handler();
 
     private static JunctionService instance;
 
@@ -83,17 +84,22 @@ public class JunctionService extends Service {
 		partyProp = new PartyProp("party_prop");
 		instance = this;
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		// For debugging, hardcode a party
-		initJunction(Uri.parse("junction://openjunction.org/partyware"));
     }
 
-	private void notify(String title, String msg){
-        Notification notification = new Notification(
-			R.drawable.ellipsis, "Junction", System.currentTimeMillis());
-        Intent i = new Intent();
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, i, 0);
-        notification.setLatestEventInfo(this, title, message, contentIntent);
-        notificationManager.notify(0, notification);
+	private void notification(final String msg){
+		mHandler.post(new Runnable(){
+				public void run(){
+					Notification notification = new Notification(
+						R.drawable.party_icon, msg, System.currentTimeMillis());
+					Intent i = new Intent();
+					PendingIntent contentIntent = PendingIntent.getActivity(
+						JunctionService.this, 0, i, 0);
+					notification.setLatestEventInfo(
+						JunctionService.this, "PartyWare", msg, contentIntent);
+					mNotificationManager.cancelAll();
+					mNotificationManager.notify(0, notification);
+				}
+			});
 	}
 
 	@Override
@@ -126,26 +132,16 @@ public class JunctionService extends Service {
 		if(connectionThread != null){
 			connectionThread.interrupt();
 		}
+		mNotificationManager.cancelAll();
 	}
 
 	protected void initJunction(final Uri uri){
 
-		notify("JX", "Initing...");
+		notification("Connecting...");
 
 		if(connectionThread != null){
 			connectionThread.interrupt();
 		}
-
-		final Handler handler = new Handler() {
-				public void handleMessage(Message msgFromChild) {
-					JSONObject msg = (JSONObject) msgFromChild.obj;
-					try {
-						Log.i("JunctionService", "Got junction msg: " + msg);
-					} catch (Exception e) {
-						e.printStackTrace(System.err);
-					}
-				}
-			};
 
 		Thread t = new Thread(){
 
@@ -162,14 +158,18 @@ public class JunctionService extends Service {
 					JunctionActor actor = new JunctionActor("participant") {
 							public void onActivityJoin() {
 								Log.i("JunctionService", "Joined activity!");
+								notification("Joined Party");
 							}
 							public void onActivityCreate(){
 								Log.i("JunctionService", "You created the activity.");
+								notification("Created Party");
 							}
-							public void onMessageReceived(MessageHeader header, JSONObject msg) {
-								Message toMain = handler.obtainMessage();
-								toMain.obj = msg;
-								handler.sendMessage(toMain);
+							public void onMessageReceived(MessageHeader header, JSONObject msg){
+								mHandler.post(new Runnable(){
+										public void run(){
+											Log.i("JunctionService", "Got msg.");
+										}
+									});
 							}
 							public List<JunctionExtra> getInitialExtras(){
 								ArrayList<JunctionExtra> l = new ArrayList<JunctionExtra>();
@@ -195,14 +195,17 @@ public class JunctionService extends Service {
 						if(!isInterrupted()){
 							JunctionService.this.jx = jx;
 							JunctionService.this.jxActor = actor;
+							notification("Connected");
 						}
 					}
 					catch(JunctionException e){
 						Log.e("JunctionService","Failed to connect to junction activity!");
+						notification("Failed to connect");
 						e.printStackTrace(System.err);
 					}
 					catch(Exception e){
 						Log.e("JunctionService","Failed to connect to junction activity!");
+						notification("Failed to connect");
 						e.printStackTrace(System.err);
 					}
 				}

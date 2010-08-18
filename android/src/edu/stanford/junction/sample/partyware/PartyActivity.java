@@ -47,6 +47,14 @@ public class PartyActivity extends RichActivity{
 					scanURL();
 				}
 			});
+
+		button = (Button)findViewById(R.id.join_debug_button);
+		button.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					JunctionService.connectToSession(
+						Uri.parse("junction://openjunction.org/partyware"));
+				}
+			});
 	}
 
 	protected void scanURL(){

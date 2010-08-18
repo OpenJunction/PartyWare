@@ -17,7 +17,7 @@
 
 
 
-  <application android:label="@string/app_name" android:icon="@drawable/icon">
+  <application android:label="@string/app_name" android:icon="@drawable/balloon_icon">
 
 
     <activity android:name="edu.stanford.junction.sample.partyware.MainActivity"

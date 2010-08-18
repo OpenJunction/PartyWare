@@ -225,8 +225,9 @@ public class ImgurUploadService extends Service {
                 0, totalFileLength);
             //empty intent for the notification
             final Intent progressIntent = new Intent();
-            final PendingIntent contentIntent = PendingIntent.getActivity(this,
-																		  0, progressIntent, 0);
+            final PendingIntent contentIntent = PendingIntent.getActivity(
+				this,
+				0, progressIntent, 0);
             mProgressNotification.contentIntent = contentIntent;
             // add notification to manager
             mNotificationManager.notify(NOTIFICATION_ID, mProgressNotification);

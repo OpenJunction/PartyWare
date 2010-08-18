@@ -61,19 +61,19 @@ public class MainActivity extends TabActivity{
 		// Initialize a TabSpec for each tab and add it to the TabHost
 		spec = tabHost.newTabSpec("party").setIndicator(
 			"Party",
-			res.getDrawable(R.drawable.shopper_icon)).setContent(intent);
+			res.getDrawable(R.drawable.party_icon)).setContent(intent);
 		tabHost.addTab(spec);
 
 		intent = new Intent().setClass(this, YoutubePlaylistActivity.class);
 		spec = tabHost.newTabSpec("playlist").setIndicator(
 			"Playlist",
-			res.getDrawable(R.drawable.shopper_icon)).setContent(intent);
+			res.getDrawable(R.drawable.playlist_icon)).setContent(intent);
 		tabHost.addTab(spec);
 
 		intent = new Intent().setClass(this, PicturesActivity.class);
 		spec = tabHost.newTabSpec("pictures").setIndicator(
 			"Pictures",
-			res.getDrawable(R.drawable.shopper_icon)).setContent(intent);
+			res.getDrawable(R.drawable.pictures_icon)).setContent(intent);
 		tabHost.addTab(spec);
 
 		tabHost.setCurrentTab(0);
