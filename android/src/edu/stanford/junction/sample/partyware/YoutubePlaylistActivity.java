@@ -39,21 +39,18 @@ import java.text.DateFormat;
 public class YoutubePlaylistActivity extends RichListActivity implements OnItemClickListener{
 
     private Handler mMainHandler;
-    private ArrayAdapter<JSONObject> mVids;
+    private MediaListAdapter mVids;
 
 	public final static int REQUEST_CODE_ADD_VIDEO = 0;
-
-	private final DateFormat dateFormat = DateFormat.getDateTimeInstance();
 
     public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.youtube);
 
-		mVids = new ArrayAdapter<JSONObject>(
-			this, 
-			android.R.layout.simple_list_item_1,
-			new ArrayList<JSONObject>());
+		mVids = new MediaListAdapter(this, 
+									 R.layout.youtube_item,
+									 new ArrayList<JSONObject>());
 		setListAdapter(mVids);
 		getListView().setTextFilterEnabled(true);
 		getListView().setOnItemClickListener(this); 
@@ -110,13 +107,12 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 		List<ResolveInfo> list = getPackageManager().queryIntentActivities(
 			i, PackageManager.MATCH_DEFAULT_ONLY);
 		if(list.size() > 0) {
-
+			startActivity(i);
 		} 
 		else{
 			toastShort("Youtube player not available!");
 		}
 	}
-
 
 
 	@Override
@@ -126,11 +122,12 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 			if(resultCode == RESULT_OK){
 				String caption = intent.getStringExtra("title");
 				String videoId = intent.getStringExtra("video_id");
+				String thumbUrl = intent.getStringExtra("thumb_url");
 				try{
 					PartyProp prop = JunctionService.getProp();
 					String userId = JunctionService.getUserId();
 					long time = (new Date()).getTime();
-					prop.addYoutube(userId, videoId, caption, time);
+					prop.addYoutube(userId, videoId, thumbUrl, caption, time);
 				}
 				catch(IllegalStateException e){
 					toastShort("Failed to get info from service! See debug log.");
@@ -154,18 +151,10 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 	}
 
 	private void refreshVideos(List<JSONObject> videos){
-		mVids.setNotifyOnChange(false);
 		mVids.clear();
 		for(JSONObject a : videos){
-			JSONObject video = new JSONObjWrapper(a){
-					public String toString(){
-						return optString("caption"); 
-					}
-				};
-			mVids.add(video);
+			mVids.add(a);
 		}
-		mVids.setNotifyOnChange(true);
-		mVids.notifyDataSetChanged();
 	}
 
 

@@ -111,7 +111,7 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 		Intent intent = new Intent();
 		intent.putExtra("title", entry.title);
 		intent.putExtra("video_id", entry.getVideoId());
-		intent.putExtra("thumbUrl", entry.thumbUrl);
+		intent.putExtra("thumb_url", entry.getThumbUrl());
 		setResult(RESULT_OK, intent);
 		finish();
 	}
@@ -123,7 +123,11 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 	public static class VideoEntry implements Cloneable{
 		@Key public String title;
 		@Key public String id;
-		@Key public String thumbUrl;
+
+		public String getThumbUrl(){
+			return "http://img.youtube.com/vi/" + 
+				this.getVideoId() + "/default.jpg";
+		}
 		
 		public String getVideoId(){
 			String id = this.id;
@@ -201,12 +205,7 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 				Message m = searchHandler.obtainMessage();
 				try {
 					HttpResponse response = request.execute();
-					// try{
 					// 	System.out.println("FEED: " + response.parseAsString());
-					// }
-					// catch(IOException e){
-					// 	System.out.println("FEED: Error reading content");
-					// }
 					VideoFeed videoFeed = response.parseAs(VideoFeed.class);
 					m.obj = videoFeed;
 					searchHandler.sendMessage(m);
@@ -251,7 +250,7 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 			if (entry != null) {
 
 				String title = entry.title;
-				String thumbUrl = entry.thumbUrl;
+				String thumbUrl = entry.getThumbUrl();
 
 				TextView tt = (TextView) v.findViewById(R.id.toptext);
 				tt.setText(title);

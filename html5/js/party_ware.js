@@ -18,6 +18,12 @@ var PartyWare =
 															self.modelChanged();
 														}});
 
+						 this.model.addTopVideoChangedListener(
+							 function(vid){
+								 loadNewVideo(vid.videoId, 0);
+							 });
+
+
 						 $("#picInputButton").click(
 							 function(){
 								 var url = $("#picInput").val();
@@ -63,18 +69,32 @@ var PartyWare =
 
 						 $("#playlist").children().remove();
 						 var vids = this.model.getPlaylist();
-						 for(i = 0; i < vids.length; i++){
-							 var ea = vids[i];
-							 div = $("<div/>").addClass("youtubeItem");
-							 var img = $('<img/>').attr({src: ea.thumbUrl});
-							 $(div).append(img);
-							 $(div).append($('<p/>').text("\'" + ea.caption + "\'"));
-							 $(img).click(
-								 function(){
-									 loadNewVideo(ea.videoId, 0);
-								 });
-							 $("#playlist").append(div);
-						 }
+						 $.each(vids,function(i,ea){
+									div = $("<div/>").addClass("youtubeItem");
+									$(div).click(
+										function(){
+											loadNewVideo(ea.videoId, 0);
+										});
+									var img = $('<img/>').attr({src: ea.thumbUrl});
+									var cap = $('<p/>').text("\'" + ea.caption + "\'");
+									var closeLink = $('<a/>').text("X").click(
+										function(){
+											self.model.deleteObject(ea);
+										});
+									var table = $('<table/>').addClass('playlistItemTable');
+									var tr = $('<tr/>');
+									var imgCell = $('<td/>').append(img).addClass('imgCell');
+									var textCell = $('<td/>').append(cap).addClass('textCell');
+									var ctrlCell = $('<td/>').append(closeLink).addClass('ctrlCell');
+									$(tr).append(imgCell);
+									$(tr).append(textCell);
+									$(tr).append(ctrlCell);
+									$(table).append(tr);
+									$(div).append(table);
+									$("#playlist").append(div);
+								});
+
+
 					 },
 
 					 buildTable: function(items, numCols, iter){
@@ -104,8 +124,8 @@ var PartyWare =
 
 
 			 this.init = function(){
-
-				 var model = new PartyProp("party_prop");
+				 var self = this;
+				 this.partyProp = new PartyProp("party_prop");
 				 var party = null;
 
 				 var actor = {
@@ -119,9 +139,9 @@ var PartyWare =
 						 }
 					 },
 					 onActivityJoin: function() {
-						 board = new PartyWare.Party(model);
+						 board = new PartyWare.Party(self.partyProp);
 					 },
-					 initialExtras: [model]
+					 initialExtras: [this.partyProp]
 				 };
 
 

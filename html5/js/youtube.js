@@ -7,10 +7,30 @@ function onYouTubePlayerReady(playerId) {
 }
 
 function onPlayerError(errorCode) {
-    alert("An error occured: " + errorCode);
+    gotoNextVideo();
 }
 
-function onytplayerStateChange(newState) {}
+function onytplayerStateChange(newState) {
+	switch(newState){
+	case -1: //unstarted
+		break;
+	case 0: //ended
+		gotoNextVideo();
+		break;
+	case 1: //playing
+		break;
+	case 2: //paused
+		break;
+	case 3: //buffering
+		break;
+	case 5: //queued
+		break;
+	}
+}
+
+function gotoNextVideo(){
+	PartyWare.partyProp.deleteTopVideo();
+}
 
 // functions for the api calls
 

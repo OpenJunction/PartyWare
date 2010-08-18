@@ -48,15 +48,14 @@ import java.text.DateFormat;
 public class PicturesActivity extends RichListActivity implements OnItemClickListener{
 
 	public final static int REQUEST_CODE_ADD_PIC = 0;
-	private ImageAdapter mPics;
-	private final DateFormat dateFormat = DateFormat.getTimeInstance();
+	private MediaListAdapter mPics;
 
     public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.pictures);
 
-		mPics = new ImageAdapter(this, 
+		mPics = new MediaListAdapter(this, 
 								 R.layout.picture_item, 
 								 new ArrayList<JSONObject>());
 		setListAdapter(mPics);
@@ -69,7 +68,6 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 					addPic();
 				}
 			});
-
 
 		final Handler refreshHandler = new Handler(){
 				@Override
@@ -164,54 +162,6 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 		super.onDestroy();
 	}
 
-	class ImageAdapter extends ArrayAdapter<JSONObject> {
-
-		BitmapManager mgr = new BitmapManager(10);
-
-		public ImageAdapter(Context context, int resource, List<JSONObject> objects){
-			super(context, resource, objects);
-		}
-
-		/** 
-		 *  Returns a new ImageView to be displayed, depending on 
-		 *	the position passed. 
-		 */
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			View v = convertView;
-			if (v == null) {
-				LayoutInflater vi = (LayoutInflater)getSystemService(
-					Context.LAYOUT_INFLATER_SERVICE);
-				v = vi.inflate(R.layout.picture_item, null);
-			}
-			JSONObject o = getItem(position);
-			if (o != null) {
-				TextView tt = (TextView) v.findViewById(R.id.toptext);
-				String caption = o.optString("caption");
-				tt.setText(caption);
-
-				Date d = new Date(o.optLong("time"));
-				String time = dateFormat.format(d); 
-				TextView bt = (TextView) v.findViewById(R.id.bottomtext);
-				bt.setText(" " + time);
-
-				ImageView icon = (ImageView)v.findViewById(R.id.icon);
-				String url = o.optString("thumbUrl");
-				Bitmap bm = mgr.getBitmap(url);
-				if(bm == null){
-					icon.setImageResource(R.drawable.shopper_icon);
-				}
-				else{
-					icon.setImageBitmap(bm);
-				}
-				icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
-			}
-			return v;
-
-		}
-
-
-	}
 
 
 }

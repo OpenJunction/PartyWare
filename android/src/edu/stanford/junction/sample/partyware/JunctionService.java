@@ -47,6 +47,7 @@ public class JunctionService extends Service {
     private PartyProp partyProp;
     private Thread connectionThread;
     private String userId;
+    private NotificationManager mNotificationManager;
 
     private static JunctionService instance;
 
@@ -81,9 +82,19 @@ public class JunctionService extends Service {
 		super.onCreate();
 		partyProp = new PartyProp("party_prop");
 		instance = this;
-		// For debugging
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		// For debugging, hardcode a party
 		initJunction(Uri.parse("junction://openjunction.org/partyware"));
     }
+
+	private void notify(String title, String msg){
+        Notification notification = new Notification(
+			R.drawable.ellipsis, "Junction", System.currentTimeMillis());
+        Intent i = new Intent();
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, i, 0);
+        notification.setLatestEventInfo(this, title, message, contentIntent);
+        notificationManager.notify(0, notification);
+	}
 
 	@Override
 	public IBinder onBind(Intent intent) {return null;}
@@ -118,6 +129,8 @@ public class JunctionService extends Service {
 	}
 
 	protected void initJunction(final Uri uri){
+
+		notify("JX", "Initing...");
 
 		if(connectionThread != null){
 			connectionThread.interrupt();

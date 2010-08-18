@@ -2,7 +2,7 @@ body{
     background-color: #000000;
 }
 
-h1,h2,h3,p{ 
+h1,h2,h3,p,a{ 
     color: #ffffff;
 }
 
@@ -29,17 +29,38 @@ h1,h2,h3,p{
     cursor: pointer;
     text-align: left;
     margin-bottom: 10px;
-}
-
-#playlist .youtubeItem p{ 
+    width: 100%
 }
 
 #playlist .youtubeItem img {
-    margin-right: 20px;
-    height: 70px;
-    float: left;
+    width: 100px;
 }
 
+#playlist .playlistItemTable {
+    border: 1px solid #555555;
+    width: 100%;
+}
+
+#playlist .playlistItemTable td {
+    border: none;
+    text-align: left;
+}
+
+#playlist .playlistItemTable .imgCell {
+    padding: 10px 10px 10px 10px;
+    width: 120px;
+}
+
+#playlist .playlistItemTable .textCell {
+    padding: 20px 20px 20px 20px;
+    width: 100%;
+}
+
+#playlist .playlistItemTable .ctrlCell {
+    padding: 10px 10px 10px 10px;
+    width: 30px;
+    vertical-align: top;
+}
 
 #pictures{ 
     text-align: center;

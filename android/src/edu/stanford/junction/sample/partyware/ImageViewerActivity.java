@@ -7,6 +7,7 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.app.ListActivity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.ServiceConnection;
 import android.content.Intent;
@@ -43,20 +44,35 @@ public class ImageViewerActivity extends RichActivity{
 	public final static String LAUNCH_INTENT = "edu.stanford.junction.sample.partyware.VIEW_PICTURE";
 
 	private BitmapManager mgr = new BitmapManager(1);
+	private ProgressDialog mProgressDialog;
+	private ImageView im;
 
     public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.image_viewer);
 
-		ImageView im = (ImageView)findViewById(R.id.image);
-
+		im = (ImageView)findViewById(R.id.image);
+		im.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
 		Intent intent = getIntent();
 		String url = intent.getStringExtra("image_url");
-		Bitmap bm = mgr.getBitmap(url);
-		im.setImageBitmap(bm);
 
-		im.setScaleType(ImageView.ScaleType.FIT_CENTER);
+		mgr.getBitmap(url, new Handler(){
+				public void handleMessage(Message msg){
+					super.handleMessage(msg);
+					Bitmap bm = (Bitmap)msg.obj;
+					if(bm != null){
+						im.setImageBitmap(bm);
+					}
+					if(mProgressDialog != null){
+						mProgressDialog.dismiss();
+					}
+				}
+			});
+
+		mProgressDialog = ProgressDialog.show(this,"",
+											  "Loading...", true);
+
 	}
 
 

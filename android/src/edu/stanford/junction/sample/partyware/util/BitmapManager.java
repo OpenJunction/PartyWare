@@ -2,6 +2,8 @@ package edu.stanford.junction.sample.partyware.util;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Handler;
+import android.os.Message;
 import java.util.*;
 import java.net.*;
 import java.io.*;
@@ -32,6 +34,17 @@ public class BitmapManager{
 			}
 
 		}; 
+	}
+
+	public void getBitmap(final String url, final Handler handler){
+		new Thread(){
+			public void run(){
+				Bitmap bm = getBitmap(url);
+				Message m = handler.obtainMessage();
+				m.obj = bm;
+				handler.sendMessage(m);
+			}
+		}.start();
 	}
 
 	public Bitmap getBitmap(String url){

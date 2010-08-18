@@ -49,8 +49,8 @@ public class PartyProp extends Prop {
 		addObj(newImageObj(userId, url, thumbUrl, caption, time));
 	}
 
-	public void addYoutube(String userId, String videoId, String caption, long time){
-		addObj(newYoutubeObj(userId, videoId, caption, time));
+	public void addYoutube(String userId, String videoId, String thumbUrl, String caption, long time){
+		addObj(newYoutubeObj(userId, videoId, thumbUrl, caption, time));
 	}
 
 	protected JSONObject newImageObj(String userId, String url, String thumbUrl, String caption, long time){
@@ -62,10 +62,11 @@ public class PartyProp extends Prop {
 	}
 
 	protected JSONObject newYoutubeObj(String userId, String videoId, 
-									   String caption, long time){
+									   String thumbUrl, String caption, long time){
 		JSONObject obj = newHTTPResourceObj("youtube", userId, null, caption, time);
 		try{
 			obj.put("videoId", videoId);
+			obj.put("thumbUrl", thumbUrl);
 		}catch(JSONException e){}
 		return obj;
 	}
@@ -135,6 +136,10 @@ public class PartyProp extends Prop {
 				String id = item.optString("id");
 				objects.put(id, (new JSONObjWrapper(item)));
 			}
+			else if(type.equals("deleteObj")){
+				String id = op.optString("itemId");
+				objects.remove(id);
+			}
 			else{
 				throw new IllegalStateException("Unrecognized operation: " + type);
 			}
@@ -175,14 +180,19 @@ public class PartyProp extends Prop {
 					images.add(ea);
 				}
 			}
-			sortByTime(images);
+			sortByTime(images, true);
 			return Collections.unmodifiableList(images);
 		}
 
-		private void sortByTime(List<JSONObject> input){
+		private void sortByTime(List<JSONObject> input, final boolean newToOld){
 			Collections.sort(input, new Comparator<JSONObject>(){
 					public int compare(JSONObject o1, JSONObject o2) {
-						return (int)(o2.optLong("time") - o1.optLong("time"));
+						if(newToOld){
+							return (int)(o2.optLong("time") - o1.optLong("time"));
+						}
+						else{
+							return (int)(o1.optLong("time") - o2.optLong("time"));
+						}
 					}
 				});
 		}
@@ -198,7 +208,7 @@ public class PartyProp extends Prop {
 					vids.add(ea);
 				}
 			}
-			sortByTime(vids);
+			sortByTime(vids, false);
 			return Collections.unmodifiableList(vids);
 		}
 

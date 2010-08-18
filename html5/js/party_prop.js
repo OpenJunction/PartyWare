@@ -1,14 +1,60 @@
 var PartyProp = JunctionProps.Prop.extend(
 	{
 		init: function(propName){
+			var self = this;
 			this._super(propName, new this.PartyPropState(null),
 						propName + "_" + randomUUID());
+
+			this.topVideoChangedListeners = [];
+			this.currentTopVideo = null;
+
+			this.addChangeListener({ type: "change",
+									 onChange: function(o){
+										 self.updateOnChange();
+									 }});
+			this.addChangeListener({ type: "sync",
+									 onChange: function(o){
+										 self.updateOnChange();
+									 }});
 		},
+		
+		/** 
+		 * Notify app of playlist change.
+		 */
+		updateOnChange: function(){
+			var pl = this.getPlaylist();
+			if(pl.length > 0){
+				var top = pl[0];
+				if(this.currentTopVideo == null || top.id != this.currentTopVideo.id){
+					this.currentTopVideo = top;
+					for(var i = 0; i < this.topVideoChangedListeners.length; i++){
+						(this.topVideoChangedListeners[i])(this.currentTopVideo);
+					}
+				}
+			}
+			else {
+				this.currentTopVideo = null;
+			}
+		},
+
+		/** 
+		 * Register a listener for this app-level event.
+		 */
+		addTopVideoChangedListener: function(func){
+			this.topVideoChangedListeners.push(func);
+		},
+
+
 		reifyState: function(jsonObj){
 			return new this.PartyPropState(jsonObj);
 		},
+
 		addObject: function(item){
 			this.addOperation({type:"addObj", item:item});
+		},
+
+		deleteObject: function(item){
+			this.addOperation({type:"deleteObj", itemId: item.id});
 		},
 
 		addPicture: function(userId,url,thumbUrl,caption){
@@ -22,6 +68,12 @@ var PartyProp = JunctionProps.Prop.extend(
 					caption: caption,
 					owner: userId
 				});
+		},
+
+		deleteTopVideo: function(){ 
+			if(this.currentTopVideo != null){
+				this.deleteObject(this.currentTopVideo);
+			}
 		},
 
 		addYoutube: function(userId,videoId,thumbUrl,caption){
@@ -60,11 +112,14 @@ var PartyProp = JunctionProps.Prop.extend(
 						this.raw = jsonObj;	
 					}
 				},
-
 				applyOperation: function(op){
 					if(op.type == "addObj"){
 						var obj = op.item;
 						this.raw.objects[obj.id] = obj;
+					}
+					else if(op.type == "deleteObj"){
+						var id = op.itemId;
+						delete this.raw.objects[id];
 					}
 					else if(op.type == "addToTimeline"){
 						this.raw.timeline.push(op.itemId);
@@ -98,10 +153,9 @@ var PartyProp = JunctionProps.Prop.extend(
 							vids.push(obj);
 						}
 					}
-					vids.sort(function(a,b){ return b.time - a.time; });
+					vids.sort(function(a,b){ return a.time - b.time; });
 					return vids;
 				},
-
 
 				toJSON:function(){
 					return JSON.parse(JSON.stringify(this.raw));
