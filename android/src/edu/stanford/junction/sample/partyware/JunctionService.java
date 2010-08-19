@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.ArrayList;
 
 import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
@@ -47,8 +45,9 @@ public class JunctionService extends Service {
     private PartyProp partyProp;
     private Thread connectionThread;
     private String userId;
-    private NotificationManager mNotificationManager;
     private Handler mHandler = new Handler();
+
+    public static final String BROADCAST_STATUS = "edu.stanford.junction.sample.partyware.JunctionStatus";
 
     private static JunctionService instance;
 
@@ -83,23 +82,13 @@ public class JunctionService extends Service {
 		super.onCreate();
 		partyProp = new PartyProp("party_prop");
 		instance = this;
-        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
-	private void notification(final String msg){
-		mHandler.post(new Runnable(){
-				public void run(){
-					Notification notification = new Notification(
-						R.drawable.party_icon, msg, System.currentTimeMillis());
-					Intent i = new Intent();
-					PendingIntent contentIntent = PendingIntent.getActivity(
-						JunctionService.this, 0, i, 0);
-					notification.setLatestEventInfo(
-						JunctionService.this, "PartyWare", msg, contentIntent);
-					mNotificationManager.cancelAll();
-					mNotificationManager.notify(0, notification);
-				}
-			});
+	private void notifyStatus(int status, String msg){
+		final Intent i = new Intent(BROADCAST_STATUS);
+		i.putExtra("status", status);
+		i.putExtra("status_text", msg);
+		sendBroadcast(i);
 	}
 
 	@Override
@@ -132,12 +121,11 @@ public class JunctionService extends Service {
 		if(connectionThread != null){
 			connectionThread.interrupt();
 		}
-		mNotificationManager.cancelAll();
 	}
 
 	protected void initJunction(final Uri uri){
 
-		notification("Connecting...");
+		notifyStatus(1, "Connecting...");
 
 		if(connectionThread != null){
 			connectionThread.interrupt();
@@ -158,11 +146,11 @@ public class JunctionService extends Service {
 					JunctionActor actor = new JunctionActor("participant") {
 							public void onActivityJoin() {
 								Log.i("JunctionService", "Joined activity!");
-								notification("Joined Party");
+								notifyStatus(2, "Joined Party");
 							}
 							public void onActivityCreate(){
 								Log.i("JunctionService", "You created the activity.");
-								notification("Created Party");
+								notifyStatus(2, "Created Party");
 							}
 							public void onMessageReceived(MessageHeader header, JSONObject msg){
 								mHandler.post(new Runnable(){
@@ -195,17 +183,17 @@ public class JunctionService extends Service {
 						if(!isInterrupted()){
 							JunctionService.this.jx = jx;
 							JunctionService.this.jxActor = actor;
-							notification("Connected");
+							notifyStatus(2, "Connected");
 						}
 					}
 					catch(JunctionException e){
 						Log.e("JunctionService","Failed to connect to junction activity!");
-						notification("Failed to connect");
+						notifyStatus(0, "Failed to connect");
 						e.printStackTrace(System.err);
 					}
 					catch(Exception e){
 						Log.e("JunctionService","Failed to connect to junction activity!");
-						notification("Failed to connect");
+						notifyStatus(0, "Failed to connect");
 						e.printStackTrace(System.err);
 					}
 				}

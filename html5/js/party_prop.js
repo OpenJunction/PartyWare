@@ -64,7 +64,7 @@ var PartyProp = JunctionProps.Prop.extend(
 					type: "image",
 					url: url,
 					thumbUrl: thumbUrl,
-					time: (new Date()).getTime(),
+					time: Math.ceil((new Date()).getTime() / 1000.0),
 					caption: caption,
 					owner: userId
 				});
@@ -83,7 +83,7 @@ var PartyProp = JunctionProps.Prop.extend(
 					type: "youtube",
 					videoId: videoId,
 					thumbUrl: thumbUrl,
-					time: (new Date()).getTime(),
+					time: Math.ceil((new Date()).getTime() / 1000),
 					caption: caption,
 					owner: userId
 				});

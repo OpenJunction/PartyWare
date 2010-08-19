@@ -242,7 +242,7 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 			if (v == null) {
 				LayoutInflater vi = (LayoutInflater)getSystemService(
 					Context.LAYOUT_INFLATER_SERVICE);
-				v = vi.inflate(R.layout.picture_item, null);
+				v = vi.inflate(R.layout.media_item, null);
 			}
 
 			VideoEntry entry = getItem(position);

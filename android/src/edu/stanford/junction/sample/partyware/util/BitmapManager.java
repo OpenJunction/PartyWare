@@ -12,28 +12,29 @@ import java.io.*;
 public class BitmapManager{
 
 	private final float hashTableLoadFactor = 0.75f;
-	final LinkedHashMap<String, Bitmap> cache;
+	final Map<String, Bitmap> cache;
 	final int cacheSize;
 
 	public BitmapManager(int cacheSize){
 		this.cacheSize = cacheSize;
 		int hashTableCapacity = (int)Math.ceil(cacheSize / hashTableLoadFactor) + 1;
-		cache = new LinkedHashMap<String,Bitmap>( 
-			hashTableCapacity, hashTableLoadFactor, true) {
+		cache = Collections.synchronizedMap(
+			new LinkedHashMap<String,Bitmap>( 
+				hashTableCapacity, hashTableLoadFactor, true) {
 
-			@Override protected boolean removeEldestEntry 
-			(Map.Entry<String,Bitmap> eldest) {
-				if(size() > BitmapManager.this.cacheSize){
-					String url = eldest.getKey();
-					remove(url);
+				@Override protected boolean removeEldestEntry 
+				(Map.Entry<String,Bitmap> eldest) {
+					if(size() > BitmapManager.this.cacheSize){
+						String url = eldest.getKey();
+						remove(url);
+					}
+
+					// We already handled it manually, so
+					// return false.
+					return false;
 				}
 
-				// We already handled it manually, so
-				// return false.
-				return false;
-			}
-
-		}; 
+			}); 
 	}
 
 	public void getBitmap(final String url, final Handler handler){
@@ -58,10 +59,7 @@ public class BitmapManager{
 				URLConnection conn = aURL.openConnection();
 				conn.connect();
 				InputStream is = conn.getInputStream();
-				/* Buffered is always good for a performance plus. */
 				BufferedInputStream bis = new BufferedInputStream(is);
-
-				/* Decode url-data to a bitmap. */
 				Bitmap newBm = BitmapFactory.decodeStream(bis);
 				bis.close();
 				is.close();

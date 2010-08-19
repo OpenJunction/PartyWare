@@ -87,7 +87,7 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 				});
 		}
 		catch(IllegalStateException e){
-			toastShort("Failed to get info from service! See debug log.");
+			toastShort("Oops! Not connected to any party.");
 			e.printStackTrace(System.err);
 		}
 
@@ -126,13 +126,18 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 				try{
 					PartyProp prop = JunctionService.getProp();
 					String userId = JunctionService.getUserId();
-					long time = (new Date()).getTime();
+					long time = (long)(System.currentTimeMillis()/1000.0);
 					prop.addYoutube(userId, videoId, thumbUrl, caption, time);
 				}
 				catch(IllegalStateException e){
-					toastShort("Failed to get info from service! See debug log.");
+					toastShort("Oops! Not connected to any party.");
 					e.printStackTrace(System.err);
 				}
+				catch(Exception e){
+					toastShort("Oops! Failed to add video to party.");
+					e.printStackTrace(System.err);
+				}
+
 			}
 			break;
 		}

@@ -9,15 +9,19 @@
       android:layout_height="wrap_content"
       xmlns:android="http://schemas.android.com/apk/res/android"
       android:orientation="horizontal"
-      android:gravity="center"
-      >
+      android:gravity="center">
     <Button
-	android:id="@+id/add_picture_button"
-	android:layout_width="wrap_content"
+	android:id="@+id/use_camera_button"
+	android:layout_weight="0.5"
+	android:layout_width="fill_parent"
 	android:layout_height="50dip"
-	android:layout_margin="5dip"
-	android:text="Add a Picture"
-	/> 
+	android:text="Take Picture"/> 
+    <Button
+	android:id="@+id/pick_from_library_button"
+	android:layout_weight="0.5"
+	android:layout_width="fill_parent"
+	android:layout_height="50dip"
+	android:text="Find Picture"/>    
   </LinearLayout>
   <ListView
       android:id="@+id/android:list"

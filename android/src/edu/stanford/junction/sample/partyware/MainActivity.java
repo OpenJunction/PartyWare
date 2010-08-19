@@ -16,10 +16,14 @@ import android.app.Service;
 import android.app.Activity;
 import android.app.TabActivity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.ServiceConnection;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.BroadcastReceiver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Process;
@@ -28,6 +32,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.TabHost;
 import android.widget.TabHost.TabSpec;
 
@@ -44,12 +50,30 @@ public class MainActivity extends TabActivity{
 	private static final int ADD_PIC = 1;
 	private static final int EXIT = 2;
 
+	private TextView mJunctionStatus;
+	private ImageView mJunctionStatusLight;
+	private BroadcastReceiver mJunctionStatusReceiver;
+
+
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		// Create top-level tabs
+		mJunctionStatus = (TextView)findViewById(R.id.junction_status_text);
+		mJunctionStatusLight = (ImageView)findViewById(R.id.junction_status_icon);
 
+		mJunctionStatusReceiver = new BroadcastReceiver(){
+				public void onReceive(Context context, Intent intent) {
+					String statusText = intent.getStringExtra("status_text");
+					int status = intent.getIntExtra("status", 0);
+					updateJunctionStatus(status, statusText);
+				}
+			};
+		IntentFilter intentFilter = new IntentFilter(JunctionService.BROADCAST_STATUS);
+		registerReceiver(mJunctionStatusReceiver, intentFilter);
+
+
+		// Create top-level tabs
 		Resources res = getResources(); // Resource object to get Drawables
 		TabHost tabHost = getTabHost();  // The activity TabHost
 		TabHost.TabSpec spec;  // Resusable TabSpec for each tab
@@ -85,12 +109,28 @@ public class MainActivity extends TabActivity{
 		startService(i);
 	}
 
+	private void updateJunctionStatus(int status, String statusText){
+		if(status == 0){
+			mJunctionStatusLight.setImageResource(R.drawable.led_red);
+		}
+		else if(status == 1){
+			mJunctionStatusLight.setImageResource(R.drawable.led_yellow);
+		}
+		else if(status == 2){
+			mJunctionStatusLight.setImageResource(R.drawable.led_green);
+		}
+		mJunctionStatus.setText(statusText);
+	}
 
 	public void onDestroy(){
 		super.onDestroy();
 		// Start the junction service
 		Intent i = new Intent(this, JunctionService.class);
 		stopService(i);
+
+		try{
+			unregisterReceiver(mJunctionStatusReceiver);
+		} catch(IllegalArgumentException e){}
 	}
 
 

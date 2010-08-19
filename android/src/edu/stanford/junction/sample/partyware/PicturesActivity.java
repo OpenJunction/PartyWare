@@ -1,17 +1,24 @@
 package edu.stanford.junction.sample.partyware;
 
-import edu.stanford.junction.sample.partyware.util.BitmapManager;
+import edu.stanford.junction.sample.partyware.util.*;
 
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Context;
 import android.content.ServiceConnection;
 import android.content.Intent;
 import android.content.ComponentName;
+import android.content.IntentFilter;
+import android.content.BroadcastReceiver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PixelFormat;
+import android.hardware.Camera;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.Bundle;
@@ -25,6 +32,7 @@ import android.view.LayoutInflater;
 import android.widget.Button;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.Gallery;
 import android.widget.ImageView;
@@ -47,8 +55,12 @@ import java.text.DateFormat;
 
 public class PicturesActivity extends RichListActivity implements OnItemClickListener{
 
-	public final static int REQUEST_CODE_ADD_PIC = 0;
+	public final static int REQUEST_CODE_PICK_FROM_LIBRARY = 0;
+	public final static int REQUEST_CODE_TAKE_PICTURE = 1;
 	private MediaListAdapter mPics;
+	private BroadcastReceiver mUriReceiver;
+	private BroadcastReceiver mErrorReceiver;
+	private ProgressDialog mUploadProgressDialog;
 
     public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -56,16 +68,23 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 		setContentView(R.layout.pictures);
 
 		mPics = new MediaListAdapter(this, 
-								 R.layout.picture_item, 
-								 new ArrayList<JSONObject>());
+									 R.layout.media_item, 
+									 new ArrayList<JSONObject>());
 		setListAdapter(mPics);
 		getListView().setTextFilterEnabled(true);
 		getListView().setOnItemClickListener(this); 
 
-		Button button = (Button)findViewById(R.id.add_picture_button);
+		Button button = (Button)findViewById(R.id.use_camera_button);
 		button.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
-					addPic();
+					takePicture();
+				}
+			});
+
+		button = (Button)findViewById(R.id.pick_from_library_button);
+		button.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					pickFromLibrary();
 				}
 			});
 
@@ -87,7 +106,9 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 				});
 
 			prop.addChangeListener(new IPropChangeListener(){
-					public String getType(){ return Prop.EVT_SYNC; }
+					public String getType(){ 
+						return Prop.EVT_SYNC; 
+					}
 					public void onChange(Object data){
 						refreshHandler.sendEmptyMessage(0);
 					}
@@ -109,34 +130,146 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 		startActivity(intent);
 	}
 
-	protected void addPic(){
-		Intent intent = new Intent(AddPictureActivity.LAUNCH_INTENT);
-		startActivityForResult(intent, REQUEST_CODE_ADD_PIC);
+	protected void takePicture(){
+		Camera camera = Camera.open();
+		Camera.Parameters parameters = camera.getParameters();
+		parameters.setPictureFormat(PixelFormat.JPEG); 
+		parameters.setPictureSize(800, 600);
+		camera.setParameters(parameters);
+		camera.release();
+
+		Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+		if (Misc.hasImageCaptureBug()) {
+			i.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, 
+					   Uri.fromFile(new File("/sdcard/tmp")));
+		} 
+		else {
+			i.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, 
+					   android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+		}
+		startActivityForResult(i, REQUEST_CODE_TAKE_PICTURE);
 	}
 
+
+	protected void pickFromLibrary(){
+		Intent i = new Intent(
+			Intent.ACTION_PICK, 
+			android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+		startActivityForResult(i, REQUEST_CODE_PICK_FROM_LIBRARY);
+	}
+
+	protected void uploadFinishedHandler(final Intent intent){
+		final String url = intent.getStringExtra("image_url");
+		final String thumbUrl = intent.getStringExtra("thumb_url");
+
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+		alert.setTitle("Caption");  
+		alert.setMessage("Please enter a caption for your picture: ");
+
+		LayoutInflater inflater = getLayoutInflater();
+		View layout = inflater.inflate(R.layout.pic_info, null);
+		alert.setView(layout);
+		final EditText input = (EditText)(layout.findViewById(R.id.caption_text));
+
+		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {  
+				public void onClick(DialogInterface dialog, int whichButton){
+					long time = (long)(System.currentTimeMillis()/1000.0);
+					try{
+						String caption = input.getText().toString();
+						Button button = (Button)findViewById(R.id.use_camera_button);
+						PartyProp prop = JunctionService.getProp();
+						String userId = JunctionService.getUserId();
+						prop.addImage(userId, url, thumbUrl, caption, time);
+					}
+					catch(IllegalStateException e){
+						toastShort("Oops! Not connected to any party.");
+						e.printStackTrace(System.err);
+					}
+					catch(Exception e){
+						toastShort("Oops! Failed to add picture to party.");
+						e.printStackTrace(System.err);
+					}
+				}
+			});  
+		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int whichButton) {}  
+			});  
+		alert.show();  
+	}
+
+	protected void startUpload(Uri localUri){
+
+		mUriReceiver = new BroadcastReceiver() {
+				@Override
+				public void onReceive(Context context, Intent intent) {
+					unregisterReceiver(this);
+					mUploadProgressDialog.dismiss();
+					uploadFinishedHandler(intent);
+				}
+			};
+
+		IntentFilter intentFilter = new IntentFilter(ImgurUploadService.BROADCAST_FINISHED);
+		registerReceiver(mUriReceiver, intentFilter); 
+
+		mErrorReceiver = new BroadcastReceiver() {
+				@Override
+				public void onReceive(Context context, Intent intent) {
+					unregisterReceiver(this);
+					mUploadProgressDialog.dismiss();
+					String error = intent.getStringExtra("error");
+					showDialog(error);
+				}
+			};
+		intentFilter = new IntentFilter(ImgurUploadService.BROADCAST_FAILED);
+		registerReceiver(mErrorReceiver, intentFilter);
+
+		Intent i = new Intent(this, ImgurUploadService.class);
+		i.setAction(Intent.ACTION_SEND);
+		i.putExtra(Intent.EXTRA_STREAM, localUri);
+		startService(i);
+
+		mUploadProgressDialog = ProgressDialog.show(this,"","Uploading. Please wait...",true);
+
+	}
+
+
 	@Override
-	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
 		switch(requestCode) {
-		case REQUEST_CODE_ADD_PIC:
+		case REQUEST_CODE_PICK_FROM_LIBRARY:
 			if(resultCode == RESULT_OK){
-				String url = intent.getStringExtra(AddPictureActivity.EXTRA_URL);
-				String thumbUrl = intent.getStringExtra(AddPictureActivity.EXTRA_THUMB_URL);
-				String caption = intent.getStringExtra(AddPictureActivity.EXTRA_CAPTION);
-				try{
-					PartyProp prop = JunctionService.getProp();
-					String userId = JunctionService.getUserId();
-					long time = (new Date()).getTime();
-					prop.addImage(userId, url, thumbUrl, caption, time);
-				}
-				catch(IllegalStateException e){
-					toastShort("Failed to get info from service! See debug log.");
-					e.printStackTrace(System.err);
-				}
+				Uri localUri = data.getData();
+				startUpload(localUri);
+			}
+			break;
+		case REQUEST_CODE_TAKE_PICTURE:
+			if(resultCode == RESULT_OK){
+				Uri localUri;
+				if (Misc.hasImageCaptureBug()) {
+					File fi = new File("/sdcard/tmp");
+					try {
+						localUri = Uri.parse(
+							android.provider.MediaStore.Images.Media.insertImage(
+								getContentResolver(), 
+								fi.getAbsolutePath(), null, null));
+						if (!fi.delete()) {
+							Log.i("AddPictureActivity", "Failed to delete " + fi);
+						}
+						startUpload(localUri);
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					}
+				} else {
+					localUri = data.getData();
+					startUpload(localUri);
+                }
 				
 			}
 			break;
 		}
 	}
+
 
 	private void refresh(){
 		try{
@@ -160,6 +293,13 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 
 	public void onDestroy(){
 		super.onDestroy();
+		try{
+			unregisterReceiver(mUriReceiver);
+			unregisterReceiver(mErrorReceiver);
+			Intent i = new Intent(this, ImgurUploadService.class);
+			stopService(i);
+		}
+		catch(IllegalArgumentException e){}
 	}
 
 

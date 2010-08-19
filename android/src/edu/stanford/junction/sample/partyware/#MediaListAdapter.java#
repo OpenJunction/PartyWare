@@ -65,6 +65,7 @@ public class MediaListAdapter extends ArrayAdapter<JSONObject> {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View v = convertView;
 		if (v == null) {
+			v = PlaylistMediaView(
 			LayoutInflater vi = (LayoutInflater)(getContext().getSystemService(
 													 Context.LAYOUT_INFLATER_SERVICE));
 			v = vi.inflate(R.layout.media_item, null);

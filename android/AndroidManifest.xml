@@ -60,15 +60,6 @@
       </intent-filter>
     </activity>
 
-    <activity android:name="edu.stanford.junction.sample.partyware.AddPictureActivity"
-	      android:label="@string/add_picture"
-	      android:screenOrientation="portrait">
-      <intent-filter>
-	<action android:name="edu.stanford.junction.sample.partyware.ADD_PICTURE" />
-	<category android:name="android.intent.category.DEFAULT" />
-      </intent-filter>
-    </activity>
-
     <activity android:name="edu.stanford.junction.sample.partyware.YoutubeSearchActivity"
 	      android:label="@string/search_youtube"
 	      android:screenOrientation="portrait">
@@ -86,17 +77,6 @@
 	<category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
     </activity>
-
-
-    <activity android:name="edu.stanford.junction.sample.partyware.AddYoutubeVideoActivity"
-	      android:label="@string/add_video"
-	      android:screenOrientation="portrait">
-      <intent-filter>
-	<action android:name="edu.stanford.junction.sample.partyware.ADD_VIDEO" />
-	<category android:name="android.intent.category.DEFAULT" />
-      </intent-filter>
-    </activity>
-
 
     <service android:name="edu.stanford.junction.sample.partyware.ImgurUploadService">
     </service>

@@ -9,15 +9,17 @@
 
   <Button
       android:id="@+id/join_debug_button"
-      android:layout_width="120dip"
+      android:layout_width="200dip"
       android:layout_height="50dip"
+      android:layout_margin="10dip"
       android:text="Join Debug Party"
       />
 
   <Button
       android:id="@+id/join_party_button"
-      android:layout_width="120dip"
+      android:layout_width="200dip"
       android:layout_height="50dip"
+      android:layout_margin="10dip"
       android:text="Join New Party"
       />
 
