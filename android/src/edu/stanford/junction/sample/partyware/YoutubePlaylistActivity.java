@@ -17,8 +17,12 @@ import android.os.Message;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.LayoutInflater;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ArrayAdapter;
@@ -31,6 +35,7 @@ import edu.stanford.junction.props2.IPropChangeListener;
 
 import org.json.JSONObject;
 
+
 import java.net.URI;
 import java.util.*;
 import java.text.DateFormat;
@@ -39,7 +44,7 @@ import java.text.DateFormat;
 public class YoutubePlaylistActivity extends RichListActivity implements OnItemClickListener{
 
     private Handler mMainHandler;
-    private MediaListAdapter mVids;
+    private VidAdapter mVids;
 
 	public final static int REQUEST_CODE_ADD_VIDEO = 0;
 
@@ -48,9 +53,7 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 
 		setContentView(R.layout.youtube);
 
-		mVids = new MediaListAdapter(this, 
-									 R.layout.youtube_item,
-									 new ArrayList<JSONObject>());
+		mVids = new VidAdapter(this);
 		setListAdapter(mVids);
 		getListView().setTextFilterEnabled(true);
 		getListView().setOnItemClickListener(this); 
@@ -165,6 +168,52 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 
 	public void onDestroy(){
 		super.onDestroy();
+	}
+
+
+
+	class VidAdapter extends MediaListAdapter<JSONObject> {
+
+		public VidAdapter(Context context){
+			super(context, R.layout.youtube_item);
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View v = convertView;
+			if (v == null) {
+				LayoutInflater vi = (LayoutInflater)(getContext().getSystemService(
+														 Context.LAYOUT_INFLATER_SERVICE));
+				v = vi.inflate(R.layout.youtube_item, null);
+			}
+			JSONObject o = getItem(position);
+			if (o != null) {
+
+				TextView tt = (TextView) v.findViewById(R.id.toptext);
+				TextView bt = (TextView) v.findViewById(R.id.bottomtext);
+				Date d = new Date(o.optLong("time") * 1000);
+				String time = dateFormat.format(d); 
+
+				if(position == 0){
+					// Now playing this video!
+					tt.setText("Now Playing: ");
+					tt.setTextColor(0xffffdd00);
+					v.setBackgroundColor(0xff222222);
+					bt.setText(o.optString("caption"));
+				}
+				else{
+					tt.setText(o.optString("caption"));
+					tt.setTextColor(0xffffffff);
+					v.setBackgroundColor(0xff000000);
+					bt.setText(" " + time);					
+				}
+
+				final ImageView icon = (ImageView)v.findViewById(R.id.icon);
+				final String url = o.optString("thumbUrl");
+				loadImage(icon, url);
+			}
+			return v;
+		}
 	}
 
 }

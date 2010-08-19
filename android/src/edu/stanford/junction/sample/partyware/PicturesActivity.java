@@ -57,7 +57,7 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 
 	public final static int REQUEST_CODE_PICK_FROM_LIBRARY = 0;
 	public final static int REQUEST_CODE_TAKE_PICTURE = 1;
-	private MediaListAdapter mPics;
+	private PicAdapter mPics;
 	private BroadcastReceiver mUriReceiver;
 	private BroadcastReceiver mErrorReceiver;
 	private ProgressDialog mUploadProgressDialog;
@@ -67,9 +67,7 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 
 		setContentView(R.layout.pictures);
 
-		mPics = new MediaListAdapter(this, 
-									 R.layout.media_item, 
-									 new ArrayList<JSONObject>());
+		mPics = new PicAdapter(this);
 		setListAdapter(mPics);
 		getListView().setTextFilterEnabled(true);
 		getListView().setOnItemClickListener(this); 
@@ -300,6 +298,40 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 			stopService(i);
 		}
 		catch(IllegalArgumentException e){}
+	}
+
+
+	class PicAdapter extends MediaListAdapter<JSONObject> {
+
+		public PicAdapter(Context context){
+			super(context, R.layout.picture_item);
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View v = convertView;
+			if (v == null) {
+				LayoutInflater vi = (LayoutInflater)(getContext().getSystemService(
+														 Context.LAYOUT_INFLATER_SERVICE));
+				v = vi.inflate(R.layout.picture_item, null);
+			}
+			JSONObject o = getItem(position);
+			if (o != null) {
+				TextView tt = (TextView) v.findViewById(R.id.toptext);
+				String caption = o.optString("caption");
+				tt.setText(caption);
+
+				Date d = new Date(o.optLong("time") * 1000);
+				String time = dateFormat.format(d); 
+				TextView bt = (TextView) v.findViewById(R.id.bottomtext);
+				bt.setText(" " + time);
+
+				final ImageView icon = (ImageView)v.findViewById(R.id.icon);
+				final String url = o.optString("thumbUrl");
+				loadImage(icon, url);
+			}
+			return v;
+		}
 	}
 
 

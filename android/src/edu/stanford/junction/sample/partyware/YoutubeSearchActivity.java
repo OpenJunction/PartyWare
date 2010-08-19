@@ -86,9 +86,7 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
     public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.youtube_search);
-		mVids = new YoutubeEntryAdapter(this, 
-										R.layout.youtube_item, 
-										new ArrayList<VideoEntry>());
+		mVids = new YoutubeEntryAdapter(this);
 		setListAdapter(mVids);
 		getListView().setTextFilterEnabled(true);
 		getListView().setOnItemClickListener(this); 
@@ -224,12 +222,11 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 		super.onDestroy();
 	}
 
-	class YoutubeEntryAdapter extends ArrayAdapter<VideoEntry> {
 
-		BitmapManager mgr = new BitmapManager(10);
+	class YoutubeEntryAdapter extends MediaListAdapter<VideoEntry> {
 
-		public YoutubeEntryAdapter(Context context, int resource, List<VideoEntry> objects){
-			super(context, resource, objects);
+		public YoutubeEntryAdapter(Context context){
+			super(context, R.layout.youtube_item);
 		}
 
 		/** 
@@ -242,13 +239,10 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 			if (v == null) {
 				LayoutInflater vi = (LayoutInflater)getSystemService(
 					Context.LAYOUT_INFLATER_SERVICE);
-				v = vi.inflate(R.layout.media_item, null);
+				v = vi.inflate(R.layout.youtube_item, null);
 			}
-
 			VideoEntry entry = getItem(position);
-
 			if (entry != null) {
-
 				String title = entry.title;
 				String thumbUrl = entry.getThumbUrl();
 
@@ -256,14 +250,7 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 				tt.setText(title);
 
 				ImageView icon = (ImageView)v.findViewById(R.id.icon);
-				Bitmap bm = mgr.getBitmap(thumbUrl);
-				if(bm == null){
-					icon.setImageResource(R.drawable.shopper_icon);
-				}
-				else{
-					icon.setImageBitmap(bm);
-				}
-				icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+				loadImage(icon, thumbUrl);
 			}
 			return v;
 

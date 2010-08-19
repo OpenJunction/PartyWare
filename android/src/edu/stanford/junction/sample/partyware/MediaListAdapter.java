@@ -22,22 +22,19 @@ import android.widget.ImageView;
 import android.widget.BaseAdapter;
 import android.widget.AdapterView;
 
-import org.json.JSONObject;
-
 import java.net.*;
 import java.io.*;
 import java.util.*;
 import java.text.DateFormat;
 
 
-public class MediaListAdapter extends ArrayAdapter<JSONObject> {
+public class MediaListAdapter<T> extends ArrayAdapter<T> {
 
-	private BitmapManager mgr = new BitmapManager(10);
-	private final DateFormat dateFormat = DateFormat.getTimeInstance();
+	protected final BitmapManager mgr = new BitmapManager(10);
+	protected final DateFormat dateFormat = DateFormat.getTimeInstance();
 
-
-	public MediaListAdapter(Context context, int resource, List<JSONObject> objects){
-		super(context, resource, objects);
+	public MediaListAdapter(Context context, int resource){
+		super(context, resource, new ArrayList<T>());
 	}
 
 	class BitmapHandler extends Handler{
@@ -57,37 +54,10 @@ public class MediaListAdapter extends ArrayAdapter<JSONObject> {
 		}
 	}
 
-	/** 
-	 *  Returns a new ImageView to be displayed, depending on 
-	 *	the position passed. 
-	 */
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		View v = convertView;
-		if (v == null) {
-			LayoutInflater vi = (LayoutInflater)(getContext().getSystemService(
-													 Context.LAYOUT_INFLATER_SERVICE));
-			v = vi.inflate(R.layout.media_item, null);
-		}
-		JSONObject o = getItem(position);
-		if (o != null) {
-			TextView tt = (TextView) v.findViewById(R.id.toptext);
-			String caption = o.optString("caption");
-			tt.setText(caption);
-
-			Date d = new Date(o.optLong("time") * 1000);
-			String time = dateFormat.format(d); 
-			TextView bt = (TextView) v.findViewById(R.id.bottomtext);
-			bt.setText(" " + time);
-
-			final ImageView icon = (ImageView)v.findViewById(R.id.icon);
-			icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
-			final String url = o.optString("thumbUrl");
-
-			icon.setImageResource(R.drawable.ellipsis);
-			mgr.getBitmap(url, new BitmapHandler(icon));
-		}
-		return v;
+	protected void loadImage(final ImageView icon, String url){
+		icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+		icon.setImageResource(R.drawable.ellipsis);
+		mgr.getBitmap(url, new BitmapHandler(icon));
 	}
 
 
