@@ -61,8 +61,14 @@ public class MainActivity extends TabActivity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
+
+		// Monitor state of the junction connection
+
 		mJunctionStatus = (TextView)findViewById(R.id.junction_status_text);
 		mJunctionStatusLight = (ImageView)findViewById(R.id.junction_status_icon);
+
+		JunctionApp app = (JunctionApp)getApplication();
+		updateJunctionStatus(app.getConnectionStatus(), app.getConnectionStatusText());
 
 		mJunctionStatusReceiver = new BroadcastReceiver(){
 				public void onReceive(Context context, Intent intent) {
@@ -73,6 +79,10 @@ public class MainActivity extends TabActivity{
 			};
 		IntentFilter intentFilter = new IntentFilter(JunctionApp.BROADCAST_STATUS);
 		registerReceiver(mJunctionStatusReceiver, intentFilter);
+
+
+
+
 
 		// Create top-level tabs
 		Resources res = getResources(); // Resource object to get Drawables
@@ -103,17 +113,6 @@ public class MainActivity extends TabActivity{
 
 		tabHost.setCurrentTab(0);
 
-
-		// Maybe auto-connect
-		SharedPreferences mPrefs = getSharedPreferences("prefs", MODE_PRIVATE);
-		String url = mPrefs.getString("last_party_url", null);
-		if(url != null){
-			Toast.makeText(this, 
-						   "Reconnecting to party...", 
-						   Toast.LENGTH_SHORT).show();
-			JunctionApp app = (JunctionApp)getApplication();
-			app.connectToSession(Uri.parse(url));				
-		}
 	}
 
 	private void updateJunctionStatus(int status, String statusText){

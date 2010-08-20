@@ -45,8 +45,10 @@ public class JunctionApp extends Application {
     private Junction jx;
     private PartyProp partyProp;
     private Thread connectionThread;
-    private String userId;
+    private String mUserId;
     private Handler mHandler = new Handler();
+	private int mConnectionStatus = 0;
+	private String mConnectionStatusText = "Disconnected";
     public static final String BROADCAST_STATUS = "edu.stanford.junction.sample.partyware.JunctionStatus";
 
 	public PartyProp getProp() {
@@ -58,7 +60,15 @@ public class JunctionApp extends Application {
 	}
 
 	public String getUserId(){
-		return userId;
+		return mUserId;
+	}
+
+	public String getConnectionStatusText(){
+		return mConnectionStatusText;
+	}
+
+	public int getConnectionStatus(){
+		return mConnectionStatus;
 	}
 
 	// Called once on initial creation
@@ -66,11 +76,21 @@ public class JunctionApp extends Application {
 	public void onCreate() {
 		super.onCreate();
 		partyProp = new PartyProp("party_prop");
-		userId = (UUID.randomUUID()).toString();
-    }
+		mUserId = (UUID.randomUUID()).toString();
 
-	private void notifyStatus(int status, String msg){
+		// Maybe auto-connect
+		SharedPreferences mPrefs = getSharedPreferences("prefs", MODE_PRIVATE);
+		String url = mPrefs.getString("last_party_url", null);
+		if(url != null){
+			updateStatus(1, "Reconnecting to previous part...");
+			connectToSession(Uri.parse(url));				
+		}
+	}
+
+	private void updateStatus(int status, String msg){
 		final Intent i = new Intent(BROADCAST_STATUS);
+		mConnectionStatus = status;
+		mConnectionStatusText = msg;
 		i.putExtra("status", status);
 		i.putExtra("status_text", msg);
 		sendBroadcast(i);
@@ -93,7 +113,7 @@ public class JunctionApp extends Application {
 
 	protected void initJunction(final Uri uri){
 
-		notifyStatus(1, "Connecting...");
+		updateStatus(1, "Connecting...");
 
 		if(connectionThread != null){
 			connectionThread.interrupt();
@@ -112,11 +132,11 @@ public class JunctionApp extends Application {
 					JunctionActor actor = new JunctionActor("participant") {
 							public void onActivityJoin() {
 								Log.i("JunctionApp", "Joined activity!");
-								notifyStatus(2, "Joined Party");
+								updateStatus(2, "Joined Party");
 							}
 							public void onActivityCreate(){
 								Log.i("JunctionApp", "You created the activity.");
-								notifyStatus(2, "Created Party");
+								updateStatus(2, "Created Party");
 							}
 							public void onMessageReceived(MessageHeader header, JSONObject msg){
 								mHandler.post(new Runnable(){
@@ -149,7 +169,7 @@ public class JunctionApp extends Application {
 						if(!isInterrupted()){
 							JunctionApp.this.jx = jx;
 							JunctionApp.this.jxActor = actor;
-							notifyStatus(2, "Connected");
+							updateStatus(2, "Connected");
 							SharedPreferences mPrefs = getSharedPreferences("prefs", MODE_PRIVATE);
 							SharedPreferences.Editor ed = mPrefs.edit();
 							ed.putString("last_party_url", uri.toString());
@@ -158,12 +178,12 @@ public class JunctionApp extends Application {
 					}
 					catch(JunctionException e){
 						Log.e("JunctionApp","Failed to connect to junction activity!");
-						notifyStatus(0, "Failed to connect");
+						updateStatus(0, "Failed to connect");
 						e.printStackTrace(System.err);
 					}
 					catch(Exception e){
 						Log.e("JunctionApp","Failed to connect to junction activity!");
-						notifyStatus(0, "Failed to connect");
+						updateStatus(0, "Failed to connect");
 						e.printStackTrace(System.err);
 					}
 				}
