@@ -220,6 +220,8 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 
 	public void onDestroy(){
 		super.onDestroy();
+		mVids.clear();
+		mVids.recycle();
 	}
 
 

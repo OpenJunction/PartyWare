@@ -63,7 +63,9 @@ public class BitmapManager{
 				Bitmap newBm = BitmapFactory.decodeStream(bis);
 				bis.close();
 				is.close();
-				cache.put(url, newBm);
+				if(newBm != null){
+					cache.put(url, newBm);
+				}
 				return newBm;
 			}
 			catch(IOException e){
@@ -73,13 +75,13 @@ public class BitmapManager{
 		}
 	}
 
-	public void dispose(){
+	public void recycle(){
 		Iterator<Bitmap> it = cache.values().iterator();
 		while(it.hasNext()){
-			(it.next()).recycle();
+			Bitmap bm = it.next();
+			bm.recycle();
 		}
 		cache.clear();
 	}
-
 
 }

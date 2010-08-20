@@ -52,7 +52,6 @@ import java.util.*;
 import java.text.DateFormat;
 
 
-
 public class PicturesActivity extends RichListActivity implements OnItemClickListener{
 
 	public final static int REQUEST_CODE_PICK_FROM_LIBRARY = 0;
@@ -61,6 +60,7 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 	private BroadcastReceiver mUriReceiver;
 	private BroadcastReceiver mErrorReceiver;
 	private ProgressDialog mUploadProgressDialog;
+	private IPropChangeListener mPropListener;
 
     public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -94,28 +94,18 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 				}
 			};
 
-		try{
-			Prop prop = JunctionService.getProp();
-			prop.addChangeListener(new IPropChangeListener(){
-					public String getType(){ return Prop.EVT_CHANGE; }
-					public void onChange(Object data){
-						refreshHandler.sendEmptyMessage(0);
-					}
-				});
 
-			prop.addChangeListener(new IPropChangeListener(){
-					public String getType(){ 
-						return Prop.EVT_SYNC; 
-					}
-					public void onChange(Object data){
-						refreshHandler.sendEmptyMessage(0);
-					}
-				});
-		}
-		catch(IllegalStateException e){
-			toastShort("Failed to get info from service! See debug log.");
-			e.printStackTrace(System.err);
-		}
+		JunctionApp app = (JunctionApp)getApplication();
+		Prop prop = app.getProp();
+		mPropListener = new IPropChangeListener(){
+				public String getType(){ return Prop.EVT_ANY; }
+				public void onChange(Object data){
+					refreshHandler.sendEmptyMessage(0);
+				}
+			};
+		prop.addChangeListener(mPropListener);
+
+
 		refresh();
 	}
 
@@ -175,8 +165,10 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 					try{
 						String caption = input.getText().toString();
 						Button button = (Button)findViewById(R.id.use_camera_button);
-						PartyProp prop = JunctionService.getProp();
-						String userId = JunctionService.getUserId();
+
+						JunctionApp app = (JunctionApp)getApplication();
+						PartyProp prop = app.getProp();
+						String userId = app.getUserId();
 						prop.addImage(userId, url, thumbUrl, caption, time);
 					}
 					catch(IllegalStateException e){
@@ -270,15 +262,10 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 
 
 	private void refresh(){
-		try{
-			PartyProp prop = JunctionService.getProp();
-			List<JSONObject> images = prop.getImages();
-			refreshImages(images);
-		}
-		catch(IllegalStateException e){
-			toastShort("Failed to get info from service! See debug log.");
-			e.printStackTrace(System.err);
-		}
+		JunctionApp app = (JunctionApp)getApplication();
+		PartyProp prop = app.getProp();
+		List<JSONObject> images = prop.getImages();
+		refreshImages(images);
 	}
 
 	private void refreshImages(List<JSONObject> images){
@@ -298,6 +285,13 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 			stopService(i);
 		}
 		catch(IllegalArgumentException e){}
+
+		JunctionApp app = (JunctionApp)getApplication();
+		Prop prop = app.getProp();
+		prop.removeChangeListener(mPropListener);
+
+		mPics.clear();
+		mPics.recycle();
 	}
 
 

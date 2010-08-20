@@ -78,7 +78,7 @@ public class ImageViewerActivity extends RichActivity{
 
     public void onDestroy() {
 		super.onDestroy();
-		mgr.dispose();
+		mgr.recycle();
 	}
 
 }

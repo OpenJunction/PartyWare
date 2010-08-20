@@ -3,14 +3,14 @@ package edu.stanford.junction.sample.partyware;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.*;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
+import java.util.*;
 
+import android.app.Application;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
+import android.content.SharedPreferences;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -26,6 +26,7 @@ import android.os.Message;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.Toast;
 
 
 import edu.stanford.junction.android.AndroidJunctionMaker;
@@ -38,42 +39,26 @@ import edu.stanford.junction.provider.xmpp.XMPPSwitchboardConfig;
 
 import org.json.JSONObject;
 
+public class JunctionApp extends Application {
 
-public class JunctionService extends Service {
     private JunctionActor jxActor;
     private Junction jx;
     private PartyProp partyProp;
     private Thread connectionThread;
     private String userId;
     private Handler mHandler = new Handler();
-
     public static final String BROADCAST_STATUS = "edu.stanford.junction.sample.partyware.JunctionStatus";
 
-    private static JunctionService instance;
-
-	public static JunctionService getService() {
-		if (instance == null) {
-			throw new IllegalStateException("Could not get party prop instance!");
-		}
-		return instance;
-	}
-    
-	public static PartyProp getProp() {
-		if (instance == null || instance.partyProp == null) {
-			throw new IllegalStateException("Could not get party prop instance!");
-		}
-		return instance.partyProp;
+	public PartyProp getProp() {
+		return partyProp;
 	}
 
-	public static void connectToSession(Uri uri) {
-		if (instance == null) {
-			throw new IllegalStateException("Could not get service instance!");
-		}
-		instance.initJunction(uri);
+	public void connectToSession(Uri uri) {
+		initJunction(uri);
 	}
 
-	public static String getUserId(){
-		return (getService()).userId;
+	public String getUserId(){
+		return userId;
 	}
 
 	// Called once on initial creation
@@ -81,7 +66,7 @@ public class JunctionService extends Service {
 	public void onCreate() {
 		super.onCreate();
 		partyProp = new PartyProp("party_prop");
-		instance = this;
+		userId = (UUID.randomUUID()).toString();
     }
 
 	private void notifyStatus(int status, String msg){
@@ -92,25 +77,8 @@ public class JunctionService extends Service {
 	}
 
 	@Override
-	public IBinder onBind(Intent intent) {return null;}
-
-	// Called for each call to Context.startService
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		if(intent != null){
-			Bundle extras = intent.getExtras();
-			if(extras !=null){
-				userId = extras.getString("userId");
-			}
-		}
-		// We want this service to continue running until it is explicitly
-		// stopped, so return sticky.
-		return START_STICKY;
-	}
-	
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
+	public void onTerminate() {
+		super.onTerminate();
 		if(jxActor != null){
 			try{
 				jxActor.leave();
@@ -132,30 +100,28 @@ public class JunctionService extends Service {
 		}
 
 		Thread t = new Thread(){
-
 				public void run(){
-
 					if(jxActor != null){
 						try{
 							jxActor.leave();
-						}catch(IllegalStateException e){
+						}
+						catch(IllegalStateException e){
 							// We were'nt connected
 						}
 					}
-
 					JunctionActor actor = new JunctionActor("participant") {
 							public void onActivityJoin() {
-								Log.i("JunctionService", "Joined activity!");
+								Log.i("JunctionApp", "Joined activity!");
 								notifyStatus(2, "Joined Party");
 							}
 							public void onActivityCreate(){
-								Log.i("JunctionService", "You created the activity.");
+								Log.i("JunctionApp", "You created the activity.");
 								notifyStatus(2, "Created Party");
 							}
 							public void onMessageReceived(MessageHeader header, JSONObject msg){
 								mHandler.post(new Runnable(){
 										public void run(){
-											Log.i("JunctionService", "Got msg.");
+											Log.i("JunctionApp", "Got msg.");
 										}
 									});
 							}
@@ -174,25 +140,29 @@ public class JunctionService extends Service {
 						url = new URI(uri.toString());
 					}
 					catch(URISyntaxException e){
-						Log.e("JunctionService", "Failed to parse uri: " + uri.toString());
+						Log.e("JunctionApp", "Failed to parse uri: " + uri.toString());
 						return;
 					}
 
 					try{
 						Junction jx = AndroidJunctionMaker.getInstance(sb).newJunction(url, actor);
 						if(!isInterrupted()){
-							JunctionService.this.jx = jx;
-							JunctionService.this.jxActor = actor;
+							JunctionApp.this.jx = jx;
+							JunctionApp.this.jxActor = actor;
 							notifyStatus(2, "Connected");
+							SharedPreferences mPrefs = getSharedPreferences("prefs", MODE_PRIVATE);
+							SharedPreferences.Editor ed = mPrefs.edit();
+							ed.putString("last_party_url", uri.toString());
+							ed.commit();
 						}
 					}
 					catch(JunctionException e){
-						Log.e("JunctionService","Failed to connect to junction activity!");
+						Log.e("JunctionApp","Failed to connect to junction activity!");
 						notifyStatus(0, "Failed to connect");
 						e.printStackTrace(System.err);
 					}
 					catch(Exception e){
-						Log.e("JunctionService","Failed to connect to junction activity!");
+						Log.e("JunctionApp","Failed to connect to junction activity!");
 						notifyStatus(0, "Failed to connect");
 						e.printStackTrace(System.err);
 					}

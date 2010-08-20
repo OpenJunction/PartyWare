@@ -60,5 +60,8 @@ public class MediaListAdapter<T> extends ArrayAdapter<T> {
 		mgr.getBitmap(url, new BitmapHandler(icon));
 	}
 
+	public void recycle(){
+		mgr.recycle();
+	}
 
 }

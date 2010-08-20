@@ -8,12 +8,7 @@ var PartyWare =
 						 var self = this;
 						 this.model = model;
 
-						 this.model.addChangeListener({ type: "change",
-														onChange: function(o){
-															self.modelChanged();
-														}});
-
-						 this.model.addChangeListener({ type: "sync",
+						 this.model.addChangeListener({ type: "*",
 														onChange: function(o){
 															self.modelChanged();
 														}});
@@ -21,6 +16,13 @@ var PartyWare =
 						 this.model.addTopVideoChangedListener(
 							 function(vid){
 								 loadNewVideo(vid.videoId, 0);
+							 });
+
+
+						 $("#nameInputButton").click(
+							 function(){
+								 var name = $("#nameInput").val();
+								 self.model.setName(name);
 							 });
 
 
@@ -45,6 +47,9 @@ var PartyWare =
 					 modelChanged: function(){
 						 var self = this;
 						 var i,div;
+
+						 // Update the pictures list 
+
 						 $("#pictures").children().remove();
 						 var pics = this.model.getPictures();
 						 var table = this.buildTable(
@@ -66,6 +71,8 @@ var PartyWare =
 								 $(cell).append(div);
 							 });
 						 $("#pictures").append(table);
+
+						 // Update the youtube list
 
 						 $("#playlist").children().remove();
 						 var vids = this.model.getPlaylist();
@@ -93,6 +100,11 @@ var PartyWare =
 									$(div).append(table);
 									$("#playlist").append(div);
 								});
+
+
+						 // Update the party name
+
+						 $('#mainTitle').text("In Party: " + self.model.getName());
 
 
 					 },

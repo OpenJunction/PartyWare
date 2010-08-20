@@ -45,6 +45,8 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 
     private Handler mMainHandler;
     private VidAdapter mVids;
+	private IPropChangeListener mPropListener;
+
 
 	public final static int REQUEST_CODE_ADD_VIDEO = 0;
 
@@ -73,26 +75,16 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 				}
 			};
 
-		try{
-			Prop prop = JunctionService.getProp();
-			prop.addChangeListener(new IPropChangeListener(){
-					public String getType(){ return Prop.EVT_CHANGE; }
-					public void onChange(Object data){
-						refreshHandler.sendEmptyMessage(0);
-					}
-				});
+		JunctionApp app = (JunctionApp)getApplication();
+		Prop prop = app.getProp();
+		mPropListener = new IPropChangeListener(){
+				public String getType(){ return Prop.EVT_ANY; }
+				public void onChange(Object data){
+					refreshHandler.sendEmptyMessage(0);
+				}
+			};
+		prop.addChangeListener(mPropListener);
 
-			prop.addChangeListener(new IPropChangeListener(){
-					public String getType(){ return Prop.EVT_SYNC; }
-					public void onChange(Object data){
-						refreshHandler.sendEmptyMessage(0);
-					}
-				});
-		}
-		catch(IllegalStateException e){
-			toastShort("Oops! Not connected to any party.");
-			e.printStackTrace(System.err);
-		}
 
 		refresh();
 	}
@@ -126,20 +118,12 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 				String caption = intent.getStringExtra("title");
 				String videoId = intent.getStringExtra("video_id");
 				String thumbUrl = intent.getStringExtra("thumb_url");
-				try{
-					PartyProp prop = JunctionService.getProp();
-					String userId = JunctionService.getUserId();
-					long time = (long)(System.currentTimeMillis()/1000.0);
-					prop.addYoutube(userId, videoId, thumbUrl, caption, time);
-				}
-				catch(IllegalStateException e){
-					toastShort("Oops! Not connected to any party.");
-					e.printStackTrace(System.err);
-				}
-				catch(Exception e){
-					toastShort("Oops! Failed to add video to party.");
-					e.printStackTrace(System.err);
-				}
+
+				JunctionApp app = (JunctionApp)getApplication();
+				PartyProp prop = app.getProp();
+				String userId = app.getUserId();
+				long time = (long)(System.currentTimeMillis()/1000.0);
+				prop.addYoutube(userId, videoId, thumbUrl, caption, time);
 
 			}
 			break;
@@ -147,15 +131,10 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 	}
 
 	private void refresh(){
-		try{
-			PartyProp prop = JunctionService.getProp();
-			List<JSONObject> videos = prop.getYoutubeVids();
-			refreshVideos(videos);
-		}
-		catch(IllegalStateException e){
-			toastShort("Failed to get info from service! See debug log.");
-			e.printStackTrace(System.err);
-		}
+		JunctionApp app = (JunctionApp)getApplication();
+		PartyProp prop = app.getProp();
+		List<JSONObject> videos = prop.getYoutubeVids();
+		refreshVideos(videos);
 	}
 
 	private void refreshVideos(List<JSONObject> videos){
@@ -168,8 +147,12 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 
 	public void onDestroy(){
 		super.onDestroy();
+		JunctionApp app = (JunctionApp)getApplication();
+		Prop prop = app.getProp();
+		prop.addChangeListener(mPropListener);
+		mVids.clear();
+		mVids.recycle();
 	}
-
 
 
 	class VidAdapter extends MediaListAdapter<JSONObject> {
@@ -188,7 +171,6 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 			}
 			JSONObject o = getItem(position);
 			if (o != null) {
-
 				TextView tt = (TextView) v.findViewById(R.id.toptext);
 				TextView bt = (TextView) v.findViewById(R.id.bottomtext);
 				Date d = new Date(o.optLong("time") * 1000);

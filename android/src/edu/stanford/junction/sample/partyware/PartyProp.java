@@ -35,6 +35,10 @@ public class PartyProp extends Prop {
     // Conveniance helpers //
     /////////////////////////
 
+	public String getName(){
+		return ((PartyState)getState()).getName();
+	}
+
 	public List<JSONObject> getImages(){
 		PartyState s = (PartyState)getState();
 		return s.getImages();
@@ -94,9 +98,11 @@ public class PartyProp extends Prop {
 	static class PartyState implements IPropState {
 
 		private HashMap<String, JSONObject> objects = new HashMap<String, JSONObject>();
+		private String name = "Unnamed Party";
 
 		public PartyState(PartyState other){
 			if(other != null){
+				this.name = other.getName();
 				Iterator it = other.objects.entrySet().iterator();
 				while (it.hasNext()) {
 					Map.Entry<String,JSONObject> pair = 
@@ -128,6 +134,10 @@ public class PartyProp extends Prop {
 		public PartyState(){
 			this((PartyState)null);
 		}
+
+		public String getName(){
+			return this.name;
+		}
 		
 		public IPropState applyOperation(JSONObject op){
 			String type = op.optString("type");
@@ -140,6 +150,10 @@ public class PartyProp extends Prop {
 				String id = op.optString("itemId");
 				objects.remove(id);
 			}
+			else if(type.equals("setName")){
+				String name = op.optString("name");
+				this.name = name;
+			}
 			else{
 				throw new IllegalStateException("Unrecognized operation: " + type);
 			}
@@ -150,10 +164,12 @@ public class PartyProp extends Prop {
 			JSONObject obj = new JSONObject();
 			JSONObject jsonObjects = new JSONObject();
 			try{
+				obj.put("name", this.name);
 				obj.put("objects", jsonObjects);
 			}
 			catch(JSONException e){
-				return obj;
+				e.printStackTrace(System.err);
+				throw new IllegalStateException("toJson failed in PartyProp!");
 			}
 			Iterator it = objects.entrySet().iterator();
 			while (it.hasNext()) {
@@ -164,11 +180,13 @@ public class PartyProp extends Prop {
 					jsonObjects.put(String.valueOf(pair.getKey()), 
 									wrapper.getRaw());
 				}
-				catch(JSONException e){}
+				catch(JSONException e){
+					e.printStackTrace(System.err);
+					throw new IllegalStateException("toJson failed in PartyProp!");
+				}
 			}
 			return obj;
 		}
-
 
 		public List<JSONObject> getImages(){
 			ArrayList<JSONObject> images = new ArrayList<JSONObject>();

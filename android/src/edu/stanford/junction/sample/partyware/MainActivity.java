@@ -18,6 +18,7 @@ import android.app.TabActivity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -31,6 +32,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -69,9 +71,8 @@ public class MainActivity extends TabActivity{
 					updateJunctionStatus(status, statusText);
 				}
 			};
-		IntentFilter intentFilter = new IntentFilter(JunctionService.BROADCAST_STATUS);
+		IntentFilter intentFilter = new IntentFilter(JunctionApp.BROADCAST_STATUS);
 		registerReceiver(mJunctionStatusReceiver, intentFilter);
-
 
 		// Create top-level tabs
 		Resources res = getResources(); // Resource object to get Drawables
@@ -103,10 +104,16 @@ public class MainActivity extends TabActivity{
 		tabHost.setCurrentTab(0);
 
 
-		// Start the junction service
-		Intent i = new Intent(this, JunctionService.class);
-		i.putExtra("userId", (UUID.randomUUID()).toString());
-		startService(i);
+		// Maybe auto-connect
+		SharedPreferences mPrefs = getSharedPreferences("prefs", MODE_PRIVATE);
+		String url = mPrefs.getString("last_party_url", null);
+		if(url != null){
+			Toast.makeText(this, 
+						   "Reconnecting to party...", 
+						   Toast.LENGTH_SHORT).show();
+			JunctionApp app = (JunctionApp)getApplication();
+			app.connectToSession(Uri.parse(url));				
+		}
 	}
 
 	private void updateJunctionStatus(int status, String statusText){
@@ -124,10 +131,6 @@ public class MainActivity extends TabActivity{
 
 	public void onDestroy(){
 		super.onDestroy();
-		// Start the junction service
-		Intent i = new Intent(this, JunctionService.class);
-		stopService(i);
-
 		try{
 			unregisterReceiver(mJunctionStatusReceiver);
 		} catch(IllegalArgumentException e){}

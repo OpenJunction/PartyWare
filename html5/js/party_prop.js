@@ -49,6 +49,14 @@ var PartyProp = JunctionProps.Prop.extend(
 			return new this.PartyPropState(jsonObj);
 		},
 
+		getName: function(){
+			return this.state.getName();
+		},
+
+		setName: function(name){
+			this.addOperation({type:"setName", name: name});
+		},
+
 		addObject: function(item){
 			this.addOperation({type:"addObj", item:item});
 		},
@@ -104,8 +112,8 @@ var PartyProp = JunctionProps.Prop.extend(
 				init: function(jsonObj){
 					if(jsonObj == null){
 						this.raw = {
-							objects: {},
-							timeline: []
+							name: "Unnamed Party",
+							objects: {}
 						};
 					}
 					else{
@@ -121,8 +129,8 @@ var PartyProp = JunctionProps.Prop.extend(
 						var id = op.itemId;
 						delete this.raw.objects[id];
 					}
-					else if(op.type == "addToTimeline"){
-						this.raw.timeline.push(op.itemId);
+					else if(op.type == "setName"){
+						this.raw.name = op.name;
 					}
 				},
 
@@ -132,6 +140,8 @@ var PartyProp = JunctionProps.Prop.extend(
 						iterator(obj);
 					}
 				},
+
+				getName: function(){ return this.raw.name; },
 
 				getPictures: function(){
 					var pics = [];

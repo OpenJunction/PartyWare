@@ -26,6 +26,7 @@ var JunctionProps = new (
 
 					this.EVT_CHANGE = "change";
 					this.EVT_SYNC = "sync";
+					this.EVT_ANY = "*";
 
 					this.NO_SEQ_NUM = -1;
 
@@ -143,7 +144,7 @@ var JunctionProps = new (
 				dispatchChangeNotification: function(evtType, o){
 					for(var i = 0; i < this.changeListeners.length; i++){
 						var l = this.changeListeners[i];
-						if(l.type == evtType){
+						if(l.type == evtType || l.type == this.EVT_ANY){
 							l.onChange(o);
 						}						 
 					}
