@@ -1,35 +1,13 @@
 package edu.stanford.junction.sample.partyware;
 
-import edu.stanford.junction.sample.partyware.util.Misc;
 
-import android.content.ContentValues;
-import android.content.Context;
 import android.os.Bundle;
-import android.os.Process;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.BroadcastReceiver;
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ImageView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.net.Uri;
-import android.util.Log;
-
-import org.json.*;
-
-import java.net.*;
-import java.io.*;
-import java.util.*;
-
 
 
 public class AddYoutubeVideoActivity extends RichActivity{
@@ -48,7 +26,6 @@ public class AddYoutubeVideoActivity extends RichActivity{
 
 		EditText txt = (EditText)findViewById(R.id.caption_text);
 		txt.setHint(R.string.add_caption);
-		String caption = txt.getText().toString();
 
 		mTitleView = (TextView)findViewById(R.id.uri_view);
 
@@ -80,7 +57,7 @@ public class AddYoutubeVideoActivity extends RichActivity{
 	}
 
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		switch(requestCode) {
 		case REQUEST_CODE_SEARCH_YOUTUBE:

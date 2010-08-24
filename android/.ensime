@@ -1,0 +1,16 @@
+;; This config was generated using ensime-config-gen. Feel free to customize its contents manually. 
+
+(
+
+:server-root "/home/aemon/src/misc/ensime/dist/"
+
+:project-package "edu.stanford.junction.sample.partyware"
+
+:sources ("src" "gen")
+
+:compile-jars ("./libs/" "/home/aemon/lib/scala/lib" 
+	       "/home/aemon/lib/android/platforms/android-7")
+
+:target "./bin/classes/"
+
+)

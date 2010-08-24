@@ -1,55 +1,30 @@
 package edu.stanford.junction.sample.partyware;
 
-import edu.stanford.junction.sample.partyware.util.BitmapManager;
-
-import android.app.Activity;
-import android.app.NotificationManager;
-import android.app.Service;
-import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.ServiceConnection;
 import android.content.Intent;
-import android.content.ComponentName;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.IBinder;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Handler;
-import android.util.Log;
+import android.os.IBinder;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.EditText;
-import android.widget.Toast;
-import android.widget.Gallery;
 import android.widget.ImageView;
-import android.widget.BaseAdapter;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView;
 
-import edu.stanford.junction.extra.JSONObjWrapper;
-import edu.stanford.junction.props2.Prop;
-import edu.stanford.junction.props2.IPropChangeListener;
-
-import org.json.JSONObject;
-
-import java.net.*;
-import java.io.*;
 import java.util.*;
 import java.util.regex.*;
-import java.text.DateFormat;
 
 import com.google.api.client.util.*;
 import com.google.api.client.googleapis.*;
 import com.google.api.client.http.*;
-import com.google.api.data.youtube.v2.*;
 import com.google.api.client.xml.XmlNamespaceDictionary;
 import com.google.api.client.xml.atom.AtomParser;
 
@@ -69,10 +44,13 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 					mSearchProgressDialog.dismiss();
 				}
 				Object o = msg.obj;
-				if(o instanceof VideoFeed){
-					mVids.clear();
-					for (VideoEntry videoEntry : ((VideoFeed)o).videos) {
-						mVids.add(videoEntry);
+				if(o instanceof VideoFeed ){
+					VideoFeed feed = (VideoFeed)o; 
+					if(feed.videos != null){
+						mVids.clear();
+						for (VideoEntry videoEntry : feed.videos) {
+							mVids.add(videoEntry);
+						}
 					}
 				}
 				else if(o instanceof Throwable){
@@ -95,11 +73,21 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 		final EditText txt = (EditText)findViewById(R.id.query_text);
 		txt.setHint("Enter keywords...");
 
-		Button button = (Button)findViewById(R.id.search_button);
+		final Button button = (Button)findViewById(R.id.search_button);
 		button.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
+					
+					// Dismiss the soft keyboard.
+					InputMethodManager manager = (InputMethodManager)
+						getSystemService(Context.INPUT_METHOD_SERVICE);
+					IBinder binder = button.getApplicationWindowToken();
+					if (binder != null) {
+						manager.hideSoftInputFromWindow(binder, 0);
+					}
+
 					String q = txt.getText().toString();
 					newQuery(q);
+
 				}
 			});
 	}
@@ -228,7 +216,7 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 	class YoutubeEntryAdapter extends MediaListAdapter<VideoEntry> {
 
 		public YoutubeEntryAdapter(Context context){
-			super(context, R.layout.youtube_item);
+			super(context, R.layout.youtube_search_item);
 		}
 
 		/** 
@@ -241,7 +229,7 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 			if (v == null) {
 				LayoutInflater vi = (LayoutInflater)getSystemService(
 					Context.LAYOUT_INFLATER_SERVICE);
-				v = vi.inflate(R.layout.youtube_item, null);
+				v = vi.inflate(R.layout.youtube_search_item, null);
 			}
 			VideoEntry entry = getItem(position);
 			if (entry != null) {

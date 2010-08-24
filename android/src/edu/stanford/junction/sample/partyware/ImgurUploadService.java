@@ -40,11 +40,9 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -170,7 +168,6 @@ public class ImgurUploadService extends Service {
                 final Uri uri = (Uri) extras.getParcelable(Intent.EXTRA_STREAM);
                 if (uri != null) {
                     Log.d(this.getClass().getName(), uri.toString());
-                    // store uri so we can create the thumbnail if we succeed
                     imageLocation = uri;
                     final String jsonOutput = readPictureDataAndUpload(uri);
                     return parseJSONResponse(jsonOutput);

@@ -5,12 +5,23 @@ import org.json.JSONObject;
 import org.json.JSONException;
 import edu.stanford.junction.props2.*;
 import edu.stanford.junction.extra.JSONObjWrapper;
-import android.util.Log;
 
 public class PartyProp extends Prop {
 
+	public PartyProp(String propName, String propReplicaName, IPropState s){
+		super(propName, propReplicaName, s);
+	}
+
 	public PartyProp(String propName){
-		super(propName, propName + (new Random()).nextInt(), new PartyState());
+		this(propName, propName + (new Random()).nextInt(), new PartyState());
+	}
+
+	public IProp newFresh(){
+		return new PartyProp(getPropName(), getPropReplicaName(), new PartyState());
+	}
+
+	public void forceChangeEvent(){
+		dispatchChangeNotification(EVT_SYNC, null);
 	}
 
 	protected IPropState reifyState(JSONObject obj){
@@ -22,6 +33,16 @@ public class PartyProp extends Prop {
 		try{
 			obj.put("type", "addObj");
 			obj.put("item", item);
+		}catch(JSONException e){}
+		return obj;
+	}
+
+	protected JSONObject newVoteOp(String itemId, int count){
+		JSONObject obj = new JSONObject();
+		try{
+			obj.put("type", "vote");
+			obj.put("itemId", itemId);
+			obj.put("count", count);
 		}catch(JSONException e){}
 		return obj;
 	}
@@ -53,6 +74,14 @@ public class PartyProp extends Prop {
 		addObj(newImageObj(userId, url, thumbUrl, caption, time));
 	}
 
+	public void upvoteVideo(String id){
+		addOperation(newVoteOp(id, 1));
+	}
+
+	public void downvoteVideo(String id){
+		addOperation(newVoteOp(id, -1));
+	}
+
 	public void addYoutube(String userId, String videoId, String thumbUrl, String caption, long time){
 		addObj(newYoutubeObj(userId, videoId, thumbUrl, caption, time));
 	}
@@ -79,7 +108,6 @@ public class PartyProp extends Prop {
 											String url, String caption, long time){
 		JSONObject obj = new JSONObject();
 		try{
-			Random r = new Random();
 			obj.put("id", (UUID.randomUUID()).toString());
 			obj.put("type", type);
 			obj.put("url", url);
@@ -116,6 +144,7 @@ public class PartyProp extends Prop {
 		}
 
 		public PartyState(JSONObject obj){
+			this.name = obj.optString("name");
 			JSONObject jsonObjects = obj.optJSONObject("objects");
 			if(jsonObjects != null){
 				Iterator it = jsonObjects.keys();
@@ -153,6 +182,25 @@ public class PartyProp extends Prop {
 			else if(type.equals("setName")){
 				String name = op.optString("name");
 				this.name = name;
+			}
+			else if(type.equals("vote")){
+				String id = op.optString("itemId");
+				int count = op.optInt("count");
+				JSONObject o = objects.get(id);
+				if(o != null){
+					int cur = o.optInt("votes");
+					System.out.println("CURRENT VOTES: " + cur);
+					try{
+						o.put("votes", cur + count);
+					}
+					catch(JSONException e){
+						e.printStackTrace(System.err);
+					}
+					System.out.println("NEW VOTES: " + o.optInt("votes"));
+				}
+				else{
+					System.err.println("Couldn't find object for id: " + id);
+				}
 			}
 			else{
 				throw new IllegalStateException("Unrecognized operation: " + type);
@@ -215,6 +263,19 @@ public class PartyProp extends Prop {
 				});
 		}
 
+		private void sortByVotes(List<JSONObject> input, final boolean highToLow){
+			Collections.sort(input, new Comparator<JSONObject>(){
+					public int compare(JSONObject o1, JSONObject o2) {
+						if(highToLow){
+							return (int)(o2.optInt("votes") - o1.optInt("votes"));
+						}
+						else{
+							return (int)(o1.optInt("votes") - o2.optInt("votes"));
+						}
+					}
+				});
+		}
+
 
 		public List<JSONObject> getYoutubeVids(){
 			ArrayList<JSONObject> vids = new ArrayList<JSONObject>();
@@ -226,7 +287,7 @@ public class PartyProp extends Prop {
 					vids.add(ea);
 				}
 			}
-			sortByTime(vids, false);
+			sortByVotes(vids, true);
 			return Collections.unmodifiableList(vids);
 		}
 

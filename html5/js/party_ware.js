@@ -168,6 +168,7 @@ var PartyWare =
 				 var jx = JX.newJunction(ascript, actor);
 
 				 $("#permalink").attr('href', jx.getInvitationForWeb("participant"));
+				 $("#qrCode").attr('src', "http://qrcode.kaywa.com/img.php?d=" +  jx.getInvitationURI());
 			 };
 
 

@@ -2,25 +2,16 @@ package edu.stanford.junction.sample.partyware;
 
 import edu.stanford.junction.sample.partyware.util.*;
 
-import android.app.Activity;
-import android.app.NotificationManager;
-import android.app.Service;
-import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Context;
-import android.content.ServiceConnection;
 import android.content.Intent;
-import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.net.Uri;
-import android.os.IBinder;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.Handler;
@@ -30,26 +21,19 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
 import android.widget.Button;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.EditText;
-import android.widget.Toast;
-import android.widget.Gallery;
 import android.widget.ImageView;
-import android.widget.BaseAdapter;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView;
 
-import edu.stanford.junction.extra.JSONObjWrapper;
 import edu.stanford.junction.props2.Prop;
 import edu.stanford.junction.props2.IPropChangeListener;
 
 import org.json.JSONObject;
 
-import java.net.*;
 import java.io.*;
 import java.util.*;
-import java.text.DateFormat;
 
 
 public class PicturesActivity extends RichListActivity implements OnItemClickListener{
@@ -93,7 +77,6 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 					refresh();
 				}
 			};
-
 
 		JunctionApp app = (JunctionApp)getApplication();
 		Prop prop = app.getProp();
@@ -164,8 +147,6 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 					long time = (long)(System.currentTimeMillis()/1000.0);
 					try{
 						String caption = input.getText().toString();
-						Button button = (Button)findViewById(R.id.use_camera_button);
-
 						JunctionApp app = (JunctionApp)getApplication();
 						PartyProp prop = app.getProp();
 						String userId = app.getUserId();
@@ -224,7 +205,7 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 
 
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		switch(requestCode) {
 		case REQUEST_CODE_PICK_FROM_LIBRARY:

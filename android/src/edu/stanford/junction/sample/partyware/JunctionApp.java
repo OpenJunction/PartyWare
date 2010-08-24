@@ -1,33 +1,14 @@
 package edu.stanford.junction.sample.partyware;
 
-import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.net.*;
 import java.util.*;
 
 import android.app.Application;
-import android.app.Activity;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.appwidget.AppWidgetManager;
 import android.content.SharedPreferences;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.IntentSender.SendIntentException;
 import android.net.Uri;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.Handler;
-import android.os.Message;
-import android.telephony.PhoneStateListener;
-import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.widget.Toast;
-
 
 import edu.stanford.junction.android.AndroidJunctionMaker;
 import edu.stanford.junction.Junction;
@@ -49,6 +30,7 @@ public class JunctionApp extends Application {
     private Handler mHandler = new Handler();
 	private int mConnectionStatus = 0;
 	private String mConnectionStatusText = "Disconnected";
+	private HashSet<String> voteHistory = new HashSet<String>();
     public static final String BROADCAST_STATUS = "edu.stanford.junction.sample.partyware.JunctionStatus";
 
 	public PartyProp getProp() {
@@ -61,6 +43,24 @@ public class JunctionApp extends Application {
 
 	public String getUserId(){
 		return mUserId;
+	}
+
+	public void upvoteVideo(String id){
+		if(!(voteHistory.contains(id))){
+			partyProp.upvoteVideo(id);
+			voteHistory.add(id);
+		}
+	}
+
+	public void downvoteVideo(String id){
+		if(!(voteHistory.contains(id))){
+			partyProp.downvoteVideo(id);
+			voteHistory.add(id);
+		}
+	}
+
+	public boolean alreadyVotedFor(String id){
+		return voteHistory.contains(id);
 	}
 
 	public String getConnectionStatusText(){
@@ -118,6 +118,11 @@ public class JunctionApp extends Application {
 		if(connectionThread != null){
 			connectionThread.interrupt();
 		}
+
+		PartyProp oldProp = partyProp;
+		partyProp = (PartyProp)oldProp.newKeepingListeners();
+		oldProp.removeAllChangeListeners();
+		partyProp.forceChangeEvent();
 
 		Thread t = new Thread(){
 				public void run(){

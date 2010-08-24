@@ -4,32 +4,70 @@
     android:id="@+id/layout"
     android:layout_width="fill_parent"
     android:layout_height="?android:attr/listPreferredItemHeight"
-    android:padding="6dip">
-  <ImageView
-      android:id="@+id/icon"
-      android:layout_width="100dip"
-      android:layout_height="100dip"
-      android:layout_marginRight="6dip"
-      android:src="@drawable/icon" />
+    android:gravity="center_vertical"
+    android:padding="6dip"
+    android:descendantFocusability="blocksDescendants"
+    >
   <LinearLayout
       android:orientation="vertical"
-      android:layout_width="0dip"
-      android:layout_weight="1"
-      android:layout_height="fill_parent">
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginRight="6dip"
+      >
+    <ImageView
+	android:id="@+id/icon"
+	android:layout_width="100dip"
+	android:layout_height="100dip"
+	android:src="@drawable/icon" />
+  </LinearLayout>
+
+  <LinearLayout
+      android:orientation="vertical"
+      android:layout_width="150dip"
+      android:layout_height="fill_parent"
+      >
     <TextView
 	android:id="@+id/toptext"
 	android:layout_width="fill_parent"
-	android:layout_height="0dip"
-	android:layout_weight="1"
+	android:layout_height="fill_parent"
+	android:layout_weight="0.5"
+	android:singleLine ="false"
+	android:ellipsize="marquee"
 	android:gravity="center_vertical"
         />
     <TextView
-	android:layout_width="fill_parent"
-	android:layout_height="0dip"
-	android:layout_weight="1"
 	android:id="@+id/bottomtext"
-	android:singleLine="true"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	android:layout_weight="0.5"
+	android:singleLine="false"
 	android:ellipsize="marquee"
+	android:gravity="center_vertical"
         />
   </LinearLayout>
+
+  <LinearLayout
+      android:orientation="vertical"
+      android:layout_height="fill_parent"
+      android:layout_width="wrap_content"
+      android:gravity="center_vertical"
+      >
+    <Button
+	android:id="@+id/upvote_button"
+	android:layout_width="40dip"
+	android:layout_height="40dip"
+	android:text="+"
+	android:textStyle="bold"
+	android:textSize="18sp"
+	/>
+    <Button
+	android:id="@+id/downvote_button"
+	android:layout_width="40dip"
+	android:layout_height="40dip"
+	android:text="-"
+	android:textStyle="bold"
+	android:textSize="18sp"
+	/> 
+  </LinearLayout>
+
 </LinearLayout>

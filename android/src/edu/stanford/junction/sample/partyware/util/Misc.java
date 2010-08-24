@@ -1,10 +1,8 @@
 package edu.stanford.junction.sample.partyware.util;
 
-import android.os.Build;
 import java.util.ArrayList;
 
 public class Misc{
-
 
 	// see http://stackoverflow.com/questions/1910608/android-action-image-capture-intent
 

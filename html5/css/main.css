@@ -6,6 +6,10 @@ h1,h2,h3,p,a{
     color: #ffffff;
 }
 
+#qrCode{ 
+    margin-bottom: 10px;
+}
+
 #layoutTable{
     width: 100%
 }
