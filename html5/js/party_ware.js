@@ -36,7 +36,7 @@ var PartyWare =
 							 function(){
 								 var videoId = $("#youtubeInput").val();
 								 self.model.addYoutube(
-									 self.userId, videoId,
+									 null, self.userId, videoId,
 									 "http://blogs.wyomingnews.com/blogs/backstagepass/files/2009/09/youtube_logo.jpg", 
 									 "..from web..");
 							 });

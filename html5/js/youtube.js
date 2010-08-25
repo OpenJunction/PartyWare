@@ -29,7 +29,7 @@ function onytplayerStateChange(newState) {
 }
 
 function gotoNextVideo(){
-	PartyWare.partyProp.deleteTopVideo();
+	PartyWare.partyProp.recycleTopVideo();
 }
 
 // functions for the api calls

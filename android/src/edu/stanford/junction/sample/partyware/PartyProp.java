@@ -128,6 +128,7 @@ public class PartyProp extends Prop {
 
 		private HashMap<String, JSONObject> objects = new HashMap<String, JSONObject>();
 		private String name = "Unnamed Party";
+		private int hashCode = 0;
 
 		public PartyState(PartyState other){
 			if(other != null){
@@ -205,6 +206,21 @@ public class PartyProp extends Prop {
 				throw new IllegalStateException("Unrecognized operation: " + type);
 			}
 			return this;
+		}
+
+		protected void updateHashCode(){
+			this.hashCode = 0;
+			Iterator<JSONObject> it = objects.values().iterator();
+			while (it.hasNext()){
+				JSONObject ea = it.next();
+				String id = ea.optString("id");
+				this.hashCode ^= id.hashCode();
+			}
+			this.hashCode ^= this.name.hashCode();
+		}
+
+		public int hashCode(){
+			return this.hashCode;
 		}
 
 		public JSONObject toJSON(){

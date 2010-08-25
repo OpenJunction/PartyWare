@@ -78,16 +78,17 @@ var PartyProp = JunctionProps.Prop.extend(
 				});
 		},
 
-		deleteTopVideo: function(){ 
+		recycleTopVideo: function(){ 
 			if(this.currentTopVideo != null){
-				this.deleteObject(this.currentTopVideo);
+				var v = this.currentTopVideo;
+				this.addYoutube(v.id, v.owner, v.videoId, v.thumbUrl, v.caption);
 			}
 		},
 
-		addYoutube: function(userId,videoId,thumbUrl,caption){
+		addYoutube: function(id, userId,videoId,thumbUrl,caption){
 			this.addObject(
 				{
-					id: randomUUID(),
+					id: id || randomUUID(),
 					type: "youtube",
 					videoId: videoId,
 					thumbUrl: thumbUrl,
