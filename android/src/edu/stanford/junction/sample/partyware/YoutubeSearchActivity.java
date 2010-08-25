@@ -56,6 +56,9 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 					((Throwable)o).printStackTrace(System.err);
 					toastShort("Sorry, youtube search failed. Please try again.");
 				}
+				else{
+					toastShort("Sorry, youtube search failed. Please try again.");
+				}
 			}
 		};
 
@@ -149,7 +152,6 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 		}
 	}
 
-
 	public static class YouTubeUrl extends GoogleUrl {
 		@Key public String orderby;
 		@Key public String q;
@@ -173,7 +175,7 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 			public void run(){
 				HttpTransport transport = GoogleTransport.create();
 				GoogleHeaders headers = (GoogleHeaders) transport.defaultHeaders;
-				headers.setApplicationName("partyware-prototype-1.0");
+				headers.setApplicationName("partyware-prototype-1.0" + UUID.randomUUID());
 				headers.gdataVersion = "2";
 				transport.addParser(new JsonCParser());
 
@@ -185,17 +187,26 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 				request.url = url;
 
 				Message m = searchHandler.obtainMessage();
-				try {
-					HttpResponse response = request.execute();
-					VideoFeed videoFeed = response.parseAs(VideoFeed.class);
-					m.obj = videoFeed;
-					searchHandler.sendMessage(m);
-				} 
-				catch (Exception e) {
-					e.printStackTrace(System.err);
-					m.obj = e;
-					searchHandler.sendMessage(m);
+				Throwable error = null;
+
+				// For some crazy reason, _every_ _other_ search fails,
+				// so we try twice.
+				for(int i = 0; i < 2; i++){
+					try {
+						HttpResponse response = request.execute();
+						VideoFeed videoFeed = response.parseAs(VideoFeed.class);
+						m.obj = videoFeed;
+						searchHandler.sendMessage(m);
+						return;
+					} 
+					catch (Exception e) {
+						error = e;
+						e.printStackTrace(System.err);
+						continue;
+					}
 				}
+				m.obj = error;
+				searchHandler.sendMessage(m);
 			}
 		}.start();
 	}
