@@ -93,7 +93,8 @@ var PartyProp = JunctionProps.Prop.extend(
 					thumbUrl: thumbUrl,
 					time: Math.ceil((new Date()).getTime() / 1000),
 					caption: caption,
-					owner: userId
+					owner: userId,
+					votes: 0
 				});
 		},
 
@@ -132,6 +133,14 @@ var PartyProp = JunctionProps.Prop.extend(
 					else if(op.type == "setName"){
 						this.raw.name = op.name;
 					}
+					else if(op.type == "vote"){
+						var count = op.count;
+						var obj = this.raw.objects[op.itemId];
+						if(obj){
+							var cur = obj.votes || 0;
+							obj.votes = cur + count;
+						}
+					}
 				},
 
 				eachObject: function(iterator){
@@ -163,7 +172,10 @@ var PartyProp = JunctionProps.Prop.extend(
 							vids.push(obj);
 						}
 					}
-					vids.sort(function(a,b){ return a.time - b.time; });
+					vids.sort(function(a,b){ 
+								  if(a.votes == b.votes) return (a.time - b.time);
+								  else return b.votes - a.votes;
+							  });
 					return vids;
 				},
 

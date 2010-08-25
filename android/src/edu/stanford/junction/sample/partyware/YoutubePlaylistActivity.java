@@ -152,6 +152,7 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 				app.upvoteVideo(videoId);
 			}
 		}
+
 		class DownVoteListener implements OnClickListener{
 			public String videoId;
 			public DownVoteListener(String vidId){

@@ -84,6 +84,7 @@ var PartyWare =
 										});
 									var img = $('<img/>').attr({src: ea.thumbUrl});
 									var cap = $('<p/>').text("\'" + ea.caption + "\'");
+									var votes = $('<p/>').text("Votes: "+ (ea.votes || 0));
 									var closeLink = $('<a/>').text("X").click(
 										function(){
 											self.model.deleteObject(ea);
@@ -91,7 +92,7 @@ var PartyWare =
 									var table = $('<table/>').addClass('playlistItemTable');
 									var tr = $('<tr/>');
 									var imgCell = $('<td/>').append(img).addClass('imgCell');
-									var textCell = $('<td/>').append(cap).addClass('textCell');
+									var textCell = $('<td/>').append(cap).append(votes).addClass('textCell');
 									var ctrlCell = $('<td/>').append(closeLink).addClass('ctrlCell');
 									$(tr).append(imgCell);
 									$(tr).append(textCell);

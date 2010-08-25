@@ -100,6 +100,7 @@ public class PartyProp extends Prop {
 		try{
 			obj.put("videoId", videoId);
 			obj.put("thumbUrl", thumbUrl);
+			obj.put("votes", 0);
 		}catch(JSONException e){}
 		return obj;
 	}
@@ -189,14 +190,12 @@ public class PartyProp extends Prop {
 				JSONObject o = objects.get(id);
 				if(o != null){
 					int cur = o.optInt("votes");
-					System.out.println("CURRENT VOTES: " + cur);
 					try{
 						o.put("votes", cur + count);
 					}
 					catch(JSONException e){
 						e.printStackTrace(System.err);
 					}
-					System.out.println("NEW VOTES: " + o.optInt("votes"));
 				}
 				else{
 					System.err.println("Couldn't find object for id: " + id);
@@ -267,7 +266,12 @@ public class PartyProp extends Prop {
 			Collections.sort(input, new Comparator<JSONObject>(){
 					public int compare(JSONObject o1, JSONObject o2) {
 						if(highToLow){
-							return (int)(o2.optInt("votes") - o1.optInt("votes"));
+							int v1 = (int)(o1.optInt("votes"));
+							int v2 = (int)(o2.optInt("votes"));
+							long t1 = (o1.optLong("time"));
+							long t2 = (o2.optLong("time"));
+							if(v1 == v2) return (int)(t1 - t2);
+							else return (v2 - v1);
 						}
 						else{
 							return (int)(o1.optInt("votes") - o2.optInt("votes"));

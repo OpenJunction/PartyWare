@@ -203,8 +203,9 @@ var JunctionProps = new (
 						else{
 							this.assertTrue("If pending locals is empty, state hash and cleanState hash should be equal.", 
 											this.state.hashCode() == this.cleanState.hashCode());
-							this.cleanState.applyOperation(opMsg.op);
-							this.state.applyOperation(opMsg.op);
+							var op = opMsg.op;
+							this.cleanState.applyOperation(op);
+							this.state.applyOperation(deepObjCopy(op));
 						}
 						changed = true;
 					}
