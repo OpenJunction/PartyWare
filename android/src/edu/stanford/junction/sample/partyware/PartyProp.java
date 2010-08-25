@@ -21,7 +21,7 @@ public class PartyProp extends Prop {
 	}
 
 	public void forceChangeEvent(){
-		dispatchChangeNotification(EVT_SYNC, null);
+		dispatchChangeNotification(EVT_ANY, null);
 	}
 
 	protected IPropState reifyState(JSONObject obj){
@@ -65,9 +65,18 @@ public class PartyProp extends Prop {
 		return s.getImages();
 	}
 
+	public List<JSONObject> getUsers(){
+		PartyState s = (PartyState)getState();
+		return s.getUsers();
+	}
+
 	public List<JSONObject> getYoutubeVids(){
 		PartyState s = (PartyState)getState();
 		return s.getYoutubeVids();
+	}
+
+	public void updateUser(String userId, String name, String email, String imageUrl){
+		addObj(newUserObj(userId, name, email, imageUrl));
 	}
 
 	public void addImage(String userId, String url, String thumbUrl, String caption, long time){
@@ -115,6 +124,18 @@ public class PartyProp extends Prop {
 			obj.put("time", time);
 			obj.put("caption", caption);
 			obj.put("owner", userId);
+		}catch(JSONException e){}
+		return obj;
+	}
+
+	protected JSONObject newUserObj(String userId, String name, String email, String imageUrl) {
+		JSONObject obj = new JSONObject();
+		try{
+			obj.put("id", userId);
+			obj.put("type", "user");
+			obj.put("name", name);
+			obj.put("email", email);
+			obj.put("imageUrl", imageUrl);
 		}catch(JSONException e){}
 		return obj;
 	}
@@ -252,18 +273,40 @@ public class PartyProp extends Prop {
 		}
 
 		public List<JSONObject> getImages(){
-			ArrayList<JSONObject> images = new ArrayList<JSONObject>();
+			List<JSONObject> images = getObjectsOfType("image");
+			sortByTime(images, true);
+			return Collections.unmodifiableList(images);
+		}
+
+		public List<JSONObject> getUsers(){
+			List<JSONObject> users = getObjectsOfType("user");
+			Collections.sort(users, new Comparator<JSONObject>(){
+					public int compare(JSONObject o1, JSONObject o2) {
+						return o2.optString("name").compareTo(o1.optString("name"));
+					}
+				});
+			return Collections.unmodifiableList(users);
+		}
+
+		public List<JSONObject> getYoutubeVids(){
+			List<JSONObject> vids = getObjectsOfType("youtube");
+			sortByVotes(vids, true);
+			return Collections.unmodifiableList(vids);
+		}
+
+		protected List<JSONObject> getObjectsOfType(String tpe){
+			ArrayList<JSONObject> objs = new ArrayList<JSONObject>();
 			Iterator<JSONObject> it = objects.values().iterator();
 			while (it.hasNext()) {
 				JSONObject ea = it.next();
 				String type = ea.optString("type");
-				if(type.equals("image")){
-					images.add(ea);
+				if(type.equals(tpe)){
+					objs.add(ea);
 				}
 			}
-			sortByTime(images, true);
-			return Collections.unmodifiableList(images);
+			return objs;
 		}
+
 
 		private void sortByTime(List<JSONObject> input, final boolean newToOld){
 			Collections.sort(input, new Comparator<JSONObject>(){
@@ -296,20 +339,6 @@ public class PartyProp extends Prop {
 				});
 		}
 
-
-		public List<JSONObject> getYoutubeVids(){
-			ArrayList<JSONObject> vids = new ArrayList<JSONObject>();
-			Iterator<JSONObject> it = objects.values().iterator();
-			while (it.hasNext()) {
-				JSONObject ea = it.next();
-				String type = ea.optString("type");
-				if(type.equals("youtube")){
-					vids.add(ea);
-				}
-			}
-			sortByVotes(vids, true);
-			return Collections.unmodifiableList(vids);
-		}
 
 		public IPropState copy(){
 			return new PartyState(this);

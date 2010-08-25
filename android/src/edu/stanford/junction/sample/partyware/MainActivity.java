@@ -1,61 +1,28 @@
 package edu.stanford.junction.sample.partyware;
 
-import edu.stanford.junction.android.AndroidJunctionMaker;
-import edu.stanford.junction.Junction;
-import edu.stanford.junction.JunctionException;
-import edu.stanford.junction.api.activity.JunctionActor;
-import edu.stanford.junction.api.activity.JunctionExtra;
-import edu.stanford.junction.api.messaging.MessageHeader;
-import edu.stanford.junction.provider.xmpp.XMPPSwitchboardConfig;
-import edu.stanford.junction.provider.xmpp.ConnectionTimeoutException;
 import edu.stanford.junction.props2.Prop;
-import edu.stanford.junction.props2.sample.ListState;
 import edu.stanford.junction.props2.IPropChangeListener;
-
-import android.app.Service;
-import android.app.Activity;
 import android.app.TabActivity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Process;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.Toast;
-import android.widget.Button;
+import android.os.Handler;
+import android.os.Message;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TabHost;
-import android.widget.TabHost.TabSpec;
 
-import org.json.*;
-
-import java.net.*;
-import java.io.*;
-import java.util.*;
 
 
 public class MainActivity extends TabActivity{
 
-	private static final int SCAN_URL = 0;
-	private static final int ADD_PIC = 1;
-	private static final int EXIT = 2;
-
 	private TextView mJunctionStatus;
 	private ImageView mJunctionStatusLight;
 	private BroadcastReceiver mJunctionStatusReceiver;
-
+	private IPropChangeListener mSyncListener;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -67,7 +34,7 @@ public class MainActivity extends TabActivity{
 		mJunctionStatus = (TextView)findViewById(R.id.junction_status_text);
 		mJunctionStatusLight = (ImageView)findViewById(R.id.junction_status_icon);
 
-		JunctionApp app = (JunctionApp)getApplication();
+		final JunctionApp app = (JunctionApp)getApplication();
 		updateJunctionStatus(app.getConnectionStatus(), app.getConnectionStatusText());
 
 		mJunctionStatusReceiver = new BroadcastReceiver(){
@@ -81,7 +48,21 @@ public class MainActivity extends TabActivity{
 		registerReceiver(mJunctionStatusReceiver, intentFilter);
 
 
-
+		final Handler refreshHandler = new Handler(){
+				@Override
+				public void handleMessage(Message msg) {
+					super.handleMessage(msg);
+					app.updateUser();
+				}
+			};
+		Prop prop = app.getProp();
+		mSyncListener = new IPropChangeListener(){
+				public String getType(){ return Prop.EVT_SYNC; }
+				public void onChange(Object data){
+					refreshHandler.sendEmptyMessage(0);		
+				}
+			};
+		prop.addChangeListener(mSyncListener);
 
 
 		// Create top-level tabs
@@ -97,6 +78,12 @@ public class MainActivity extends TabActivity{
 		spec = tabHost.newTabSpec("party").setIndicator(
 			"Party",
 			res.getDrawable(R.drawable.party_icon)).setContent(intent);
+		tabHost.addTab(spec);
+
+		intent = new Intent().setClass(this, PeopleActivity.class);
+		spec = tabHost.newTabSpec("people").setIndicator(
+			"People",
+			res.getDrawable(R.drawable.pictures_icon)).setContent(intent);
 		tabHost.addTab(spec);
 
 		intent = new Intent().setClass(this, YoutubePlaylistActivity.class);
@@ -133,6 +120,10 @@ public class MainActivity extends TabActivity{
 		try{
 			unregisterReceiver(mJunctionStatusReceiver);
 		} catch(IllegalArgumentException e){}
+
+		JunctionApp app = (JunctionApp)getApplication();
+		Prop prop = app.getProp();
+		prop.removeChangeListener(mSyncListener);
 	}
 
 

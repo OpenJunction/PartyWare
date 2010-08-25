@@ -20,14 +20,11 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView;
 
 import java.util.*;
-import java.util.regex.*;
 
 import com.google.api.client.util.*;
 import com.google.api.client.googleapis.*;
 import com.google.api.client.http.*;
-import com.google.api.client.xml.XmlNamespaceDictionary;
-import com.google.api.client.xml.atom.AtomParser;
-
+import com.google.api.client.googleapis.json.JsonCParser;
 
 public class YoutubeSearchActivity extends RichListActivity implements OnItemClickListener{
 
@@ -46,16 +43,18 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 				Object o = msg.obj;
 				if(o instanceof VideoFeed ){
 					VideoFeed feed = (VideoFeed)o; 
-					if(feed.videos != null){
+					if(feed.items != null){
 						mVids.clear();
-						for (VideoEntry videoEntry : feed.videos) {
-							mVids.add(videoEntry);
+						for (VideoEntry videoEntry : feed.items) {
+							if(videoEntry.isEmbedable()){
+								mVids.add(videoEntry);
+							}
 						}
 					}
 				}
 				else if(o instanceof Throwable){
 					((Throwable)o).printStackTrace(System.err);
-					toastShort("Sorry, youtube search failed. See debug log.");
+					toastShort("Sorry, youtube search failed. Please try again.");
 				}
 			}
 		};
@@ -96,43 +95,60 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 		VideoEntry entry = mVids.getItem(position);
 		Intent intent = new Intent();
 		intent.putExtra("title", entry.title);
-		intent.putExtra("video_id", entry.getVideoId());
+		intent.putExtra("video_id", entry.id);
 		intent.putExtra("thumb_url", entry.getThumbUrl());
 		setResult(RESULT_OK, intent);
 		finish();
 	}
 
-	public static class VideoFeed {
-		@Key("entry") public List<VideoEntry> videos;
+	public static class Feed {
+		@Key public int itemsPerPage;
+		@Key public int startIndex;
+		@Key public int totalItems;
+		@Key public DateTime updated;
 	}
 
-	public static class VideoEntry implements Cloneable{
-		@Key public String title;
+	public static class VideoFeed extends Feed{
+		@Key public List<VideoEntry> items;
+	}
+
+	public static class Player {
+		// "default" is a Java keyword, so need to specify the JSON key manually
+		@Key("default")
+		public String defaultUrl;
+	}
+
+	public static class AccessControl {
+		@Key public String embed;
+		@Key public String syndicate;
+	}
+
+	public static class Item {
 		@Key public String id;
+		@Key public String title;
+		@Key public DateTime updated;
+	}
 
+	public static class VideoEntry extends Item{
+		@Key public String embed;
+		@Key public String description;
+		@Key public List<String> tags;
+		@Key public Player player;
+		@Key public AccessControl accessControl;
 		public String getThumbUrl(){
-			return "http://img.youtube.com/vi/" + 
-				this.getVideoId() + "/default.jpg";
+			return "http://img.youtube.com/vi/" + this.id + "/default.jpg";
 		}
-		
-		public String getVideoId(){
-			String id = this.id;
-			if(id == null) return "NA";
-			String patternStr = "video:(.+)$";
-			Pattern pattern = Pattern.compile(patternStr);
-			Matcher matcher = pattern.matcher(id);
-			boolean matchFound = matcher.find();
-			if(matchFound){
-				return matcher.group(1); 
-			} 
-			return "NA";
+		public boolean isEmbedable(){
+			return (accessControl != null) && 
+				accessControl.syndicate.equals("allowed") && 
+				accessControl.embed.equals("allowed");
 		}
-
 		@Override
 		protected VideoEntry clone() {
 			return DataUtil.clone(this);
 		}
 	}
+
 
 	public static class YouTubeUrl extends GoogleUrl {
 		@Key public String orderby;
@@ -140,26 +156,8 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 		@Key public String safeSearch;
 		public YouTubeUrl(String encodedUrl) {
 			super(encodedUrl);
+			this.alt = "jsonc";
 		}
-	}
-
-	public static class Util {
-		public static final XmlNamespaceDictionary NAMESPACE_DICTIONARY = new XmlNamespaceDictionary();
-		static {
-			Map<String, String> map = NAMESPACE_DICTIONARY.namespaceAliasToUriMap;
-			map.put("", "http://www.w3.org/2005/Atom");
-			map.put("atom", "http://www.w3.org/2005/Atom");
-			map.put("exif", "http://schemas.google.com/photos/exif/2007");
-			map.put("gd", "http://schemas.google.com/g/2005");
-			map.put("geo", "http://www.w3.org/2003/01/geo/wgs84_pos#");
-			map.put("georss", "http://www.georss.org/georss");
-			map.put("gml", "http://www.opengis.net/gml");
-			map.put("gphoto", "http://schemas.google.com/photos/2007");
-			map.put("media", "http://search.yahoo.com/mrss/");
-			map.put("openSearch", "http://a9.com/-/spec/opensearch/1.1/");
-			map.put("xml", "http://www.w3.org/XML/1998/namespace");
-		}
-		private Util() {}
 	}
 
 
@@ -177,9 +175,7 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 				GoogleHeaders headers = (GoogleHeaders) transport.defaultHeaders;
 				headers.setApplicationName("partyware-prototype-1.0");
 				headers.gdataVersion = "2";
-				AtomParser parser = new AtomParser();
-				parser.namespaceDictionary = Util.NAMESPACE_DICTIONARY;
-				transport.addParser(parser);
+				transport.addParser(new JsonCParser());
 
 				YouTubeUrl url = new YouTubeUrl("http://gdata.youtube.com/feeds/api/videos");
 				url.orderby = "relevance";
@@ -191,12 +187,12 @@ public class YoutubeSearchActivity extends RichListActivity implements OnItemCli
 				Message m = searchHandler.obtainMessage();
 				try {
 					HttpResponse response = request.execute();
-					// 	System.out.println("FEED: " + response.parseAsString());
 					VideoFeed videoFeed = response.parseAs(VideoFeed.class);
 					m.obj = videoFeed;
 					searchHandler.sendMessage(m);
 				} 
 				catch (Exception e) {
+					e.printStackTrace(System.err);
 					m.obj = e;
 					searchHandler.sendMessage(m);
 				}

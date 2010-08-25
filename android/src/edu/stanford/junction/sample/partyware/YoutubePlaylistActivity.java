@@ -131,7 +131,7 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 		super.onDestroy();
 		JunctionApp app = (JunctionApp)getApplication();
 		Prop prop = app.getProp();
-		prop.addChangeListener(mPropListener);
+		prop.removeChangeListener(mPropListener);
 		mVids.clear();
 		mVids.recycle();
 	}

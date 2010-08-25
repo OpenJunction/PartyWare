@@ -9,9 +9,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
+import android.telephony.*;  
 
 import edu.stanford.junction.android.AndroidJunctionMaker;
-import edu.stanford.junction.Junction;
 import edu.stanford.junction.JunctionException;
 import edu.stanford.junction.api.activity.JunctionActor;
 import edu.stanford.junction.api.activity.JunctionExtra;
@@ -23,10 +23,13 @@ import org.json.JSONObject;
 public class JunctionApp extends Application {
 
     private JunctionActor jxActor;
-    private Junction jx;
     private PartyProp partyProp;
     private Thread connectionThread;
     private String mUserId;
+    private String mUserName = "No Name";
+    private String mUserEmail = "No Email";
+    private String mUserImageUrl = "http://www.independent.co.uk/multimedia/archive/00390/Self_Portrait__c_19_390601t.jpg";
+
     private Handler mHandler = new Handler();
 	private int mConnectionStatus = 0;
 	private String mConnectionStatusText = "Disconnected";
@@ -41,8 +44,23 @@ public class JunctionApp extends Application {
 		initJunction(uri);
 	}
 
-	public String getUserId(){
-		return mUserId;
+	public String getUserId(){ return mUserId; }
+
+	public String getUserName(){ return mUserName; }
+
+	public String getUserEmail(){ return mUserEmail; }
+
+	public String getUserImageUrl(){ return mUserImageUrl; }
+
+	public void updateUser(String name, String email, String imageUrl){
+		mUserName = name;
+		mUserEmail = email;
+		mUserImageUrl = imageUrl;
+		partyProp.updateUser(mUserId, name, email, imageUrl);
+	}
+
+	public void updateUser(){
+		partyProp.updateUser(mUserId, mUserName, mUserEmail, mUserImageUrl);
 	}
 
 	public void upvoteVideo(String id){
@@ -71,12 +89,39 @@ public class JunctionApp extends Application {
 		return mConnectionStatus;
 	}
 
+	protected String buildUserId(){
+		TelephonyManager mTelephonyMgr = (TelephonyManager)getSystemService(TELEPHONY_SERVICE);  
+		int code = 0;
+        String imei = mTelephonyMgr.getDeviceId(); 
+		if(imei != null){
+			code ^= imei.hashCode();
+		}
+        String softwareVer = mTelephonyMgr.getDeviceSoftwareVersion(); 
+		if(softwareVer != null){
+			code ^= softwareVer.hashCode();
+		}
+        String simSerial = mTelephonyMgr.getSimSerialNumber(); 
+		if(simSerial != null){
+			code ^= simSerial.hashCode();
+		}
+
+		// If all else fails, generate random.
+		if(code == 0){
+			System.err.println("Couldn't get device specific id, using random!");
+			code = UUID.randomUUID().toString().hashCode();
+		}
+
+		String id = "_" + code + "_";
+		return id;
+	}
+
 	// Called once on initial creation
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		partyProp = new PartyProp("party_prop");
-		mUserId = (UUID.randomUUID()).toString();
+
+		mUserId = buildUserId();
 
 		// Maybe auto-connect
 		SharedPreferences mPrefs = getSharedPreferences("prefs", MODE_PRIVATE);
@@ -170,9 +215,8 @@ public class JunctionApp extends Application {
 					}
 
 					try{
-						Junction jx = AndroidJunctionMaker.getInstance(sb).newJunction(url, actor);
+						AndroidJunctionMaker.getInstance(sb).newJunction(url, actor);
 						if(!isInterrupted()){
-							JunctionApp.this.jx = jx;
 							JunctionApp.this.jxActor = actor;
 							updateStatus(2, "Connected");
 							SharedPreferences mPrefs = getSharedPreferences("prefs", MODE_PRIVATE);
