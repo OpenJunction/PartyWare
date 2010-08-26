@@ -14,7 +14,8 @@
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="android.permission.CAMERA"/>
   <uses-permission android:name="android.permission.FLASHLIGHT"/>
-  <uses-permission android:name="android.permission.READ_PHONE_STATE"></uses-permission>  
+  <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+  <uses-permission android:name="android.permission.READ_CONTACTS"/>
 
 
 
@@ -84,6 +85,14 @@
 	      android:label="@string/view_picture">
       <intent-filter>
 	<action android:name="edu.stanford.junction.sample.partyware.VIEW_PICTURE" />
+	<category android:name="android.intent.category.DEFAULT" />
+      </intent-filter>
+    </activity>
+
+    <activity android:name="edu.stanford.junction.sample.partyware.UpdateProfileActivity"
+	      android:label="@string/view_picture">
+      <intent-filter>
+	<action android:name="edu.stanford.junction.sample.partyware.UPDATE_PROFILE" />
 	<category android:name="android.intent.category.DEFAULT" />
       </intent-filter>
     </activity>

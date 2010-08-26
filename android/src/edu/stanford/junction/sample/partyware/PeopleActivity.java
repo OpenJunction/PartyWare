@@ -69,10 +69,12 @@ public class PeopleActivity extends RichListActivity implements OnItemClickListe
 	}
 
 	protected void updateProfile(){
-		final JunctionApp app = (JunctionApp)getApplication();
-		app.updateUser();
-		// Intent intent = new Intent(UpdateProfileActivity.LAUNCH_INTENT);
-		// startActivityForResult(i, REQUEST_CODE_UPDATE_USER);
+		JunctionApp app = (JunctionApp)getApplication();
+		Intent intent = new Intent(UpdateProfileActivity.LAUNCH_INTENT);
+		intent.putExtra("name", app.getUserName());
+		intent.putExtra("email", app.getUserEmail());
+		intent.putExtra("image_url", app.getUserImageUrl());
+		startActivityForResult(intent, REQUEST_CODE_UPDATE_USER);
 	}
 
 
@@ -82,7 +84,11 @@ public class PeopleActivity extends RichListActivity implements OnItemClickListe
 		switch(requestCode) {
 		case REQUEST_CODE_UPDATE_USER:
 			if(resultCode == RESULT_OK){
-				//
+				String name = data.getStringExtra("name");
+				String email = data.getStringExtra("email");
+				String imageUrl = data.getStringExtra("image_url");
+				final JunctionApp app = (JunctionApp)getApplication();
+				app.updateUser(name, email, imageUrl);
 			}
 			break;
 		}

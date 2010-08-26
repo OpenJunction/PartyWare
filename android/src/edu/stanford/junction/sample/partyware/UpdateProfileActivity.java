@@ -1,7 +1,6 @@
 package edu.stanford.junction.sample.partyware;
 
-
-import edu.stanford.junction.sample.partyware.util.Misc;
+import edu.stanford.junction.sample.partyware.util.*;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -10,12 +9,15 @@ import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
 import android.app.ProgressDialog;
 import android.graphics.PixelFormat;
+import android.graphics.Bitmap;
 import android.hardware.Camera;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 import android.net.Uri;
 import android.util.Log;
@@ -23,31 +25,51 @@ import android.util.Log;
 import java.io.*;
 
 
-public class AddPictureActivity extends RichActivity{
+public class UpdateProfileActivity extends RichActivity{
 
-	public final static String EXTRA_CAPTION = "edu.stanford.junction.sample.partyware.CAPTION";
-	public final static String EXTRA_URL = "edu.stanford.junction.sample.partyware.IMAGE_URL";
-	public final static String EXTRA_THUMB_URL = "edu.stanford.junction.sample.partyware.THUMB_URL";
-	public final static String LAUNCH_INTENT = "edu.stanford.junction.sample.partyware.ADD_PICTURE";
+	public final static String LAUNCH_INTENT = "edu.stanford.junction.sample.partyware.UPDATE_PROFILE";
 
 	public final static int REQUEST_CODE_PICK_FROM_LIBRARY = 0;
 	public final static int REQUEST_CODE_TAKE_PICTURE = 1;
 
-	private TextView mUriView;
-	private Uri mUri;
-	private Uri mThumbUri;
+	private Uri mPortraitUri;
+	private EditText mNameText;
+	private EditText mEmailText;
+	private ImageView mPortraitView;
 	private ProgressDialog mUploadProgressDialog;
 	private BroadcastReceiver mUriReceiver;
 	private BroadcastReceiver mErrorReceiver;
+	private BitmapManager mgr = new BitmapManager(1);
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.add_picture);
 
-		EditText txt = (EditText)findViewById(R.id.caption_text);
-		txt.setHint(R.string.add_caption);
+		setContentView(R.layout.update_profile);
 
-		mUriView = (TextView)findViewById(R.id.uri_view);
+		mNameText = (EditText)findViewById(R.id.name_text);
+		mEmailText = (EditText)findViewById(R.id.email_text);
+		mPortraitView = (ImageView)findViewById(R.id.image);
+		mPortraitView.setImageResource(R.drawable.ellipsis);
+
+		Intent intent = getIntent();
+
+		String name = intent.getStringExtra("name");
+		if(name != null){
+			mNameText.setText(intent.getStringExtra("name"));
+		}
+
+		String email = intent.getStringExtra("email");
+		if(email != null){
+			mEmailText.setText(intent.getStringExtra("email"));
+		}
+
+		String uri = intent.getStringExtra("image_url");
+		if(uri != null){
+			mPortraitUri = Uri.parse(uri);
+			showPortrait(Uri.parse(uri));
+		}
+
+
 
 		Button button = (Button)findViewById(R.id.use_camera_button);
 		button.setOnClickListener(new OnClickListener() {
@@ -78,6 +100,18 @@ public class AddPictureActivity extends RichActivity{
 			});
 	}
 
+	protected void showPortrait(Uri uri){
+		mgr.getBitmap(uri.toString(), new Handler(){
+				public void handleMessage(Message msg){
+					super.handleMessage(msg);
+					Bitmap bm = (Bitmap)msg.obj;
+					if(bm != null){
+						mPortraitView.setImageBitmap(bm);
+					}
+				}
+			});
+	}
+
 	protected void takePicture(){
 		Camera camera = Camera.open();
 		Camera.Parameters parameters = camera.getParameters();
@@ -104,15 +138,17 @@ public class AddPictureActivity extends RichActivity{
 		startActivityForResult(i, REQUEST_CODE_PICK_FROM_LIBRARY);
 	}
 
+
+
+
 	protected void startUpload(Uri localUri){
 
 		mUriReceiver = new BroadcastReceiver() {
 				@Override
 				public void onReceive(Context context, Intent intent) {
 					mUploadProgressDialog.dismiss();
-					mUri = Uri.parse(intent.getStringExtra("image_url"));
-					mThumbUri = Uri.parse(intent.getStringExtra("thumb_url"));
-					mUriView.setText(mUri.toString());
+					mPortraitUri = Uri.parse(intent.getStringExtra("thumb_url"));
+					showPortrait(mPortraitUri);
 				}
 			};
 		IntentFilter intentFilter = new IntentFilter(ImgurUploadService.BROADCAST_FINISHED);
@@ -178,7 +214,7 @@ public class AddPictureActivity extends RichActivity{
 
 
     protected void confirm(){
-		if(mUri == null || mThumbUri == null){
+		if(mPortraitUri == null){
 			Toast.makeText(this, R.string.no_image_selected, 
 						   Toast.LENGTH_SHORT).show();
 		}
@@ -189,11 +225,13 @@ public class AddPictureActivity extends RichActivity{
 
 			// return the uri with caption
 			Intent intent = new Intent();
-			EditText txt = (EditText)findViewById(R.id.caption_text);
-			String caption = txt.getText().toString();
-			intent.putExtra(EXTRA_URL, mUri.toString());
-			intent.putExtra(EXTRA_THUMB_URL, mThumbUri.toString());
-			intent.putExtra(EXTRA_CAPTION, caption);
+
+			String name = mNameText.getText().toString();
+			String email = mEmailText.getText().toString();
+
+			intent.putExtra("name", name);
+			intent.putExtra("email", email);
+			intent.putExtra("image_url", mPortraitUri.toString());
 			setResult(RESULT_OK, intent);
 
 			finish();
@@ -212,11 +250,11 @@ public class AddPictureActivity extends RichActivity{
 		try{
 			unregisterReceiver(mUriReceiver);
 			unregisterReceiver(mErrorReceiver);
-
 			Intent i = new Intent(this, ImgurUploadService.class);
 			stopService(i);
 		}
 		catch(IllegalArgumentException e){}
+		mgr.recycle();
 	}
 
 }
