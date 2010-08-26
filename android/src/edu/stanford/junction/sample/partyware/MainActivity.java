@@ -83,7 +83,7 @@ public class MainActivity extends TabActivity{
 		intent = new Intent().setClass(this, PeopleActivity.class);
 		spec = tabHost.newTabSpec("people").setIndicator(
 			"People",
-			res.getDrawable(R.drawable.pictures_icon)).setContent(intent);
+			res.getDrawable(R.drawable.people_icon)).setContent(intent);
 		tabHost.addTab(spec);
 
 		intent = new Intent().setClass(this, YoutubePlaylistActivity.class);

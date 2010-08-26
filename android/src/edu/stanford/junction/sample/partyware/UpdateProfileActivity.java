@@ -66,9 +66,8 @@ public class UpdateProfileActivity extends RichActivity{
 		String uri = intent.getStringExtra("image_url");
 		if(uri != null){
 			mPortraitUri = Uri.parse(uri);
-			showPortrait(Uri.parse(uri));
+			lazyLoadImage(mPortraitView, Uri.parse(uri));
 		}
-
 
 
 		Button button = (Button)findViewById(R.id.use_camera_button);
@@ -254,7 +253,6 @@ public class UpdateProfileActivity extends RichActivity{
 			stopService(i);
 		}
 		catch(IllegalArgumentException e){}
-		mgr.recycle();
 	}
 
 }

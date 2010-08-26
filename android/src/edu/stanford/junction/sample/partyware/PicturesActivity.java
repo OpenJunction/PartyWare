@@ -27,9 +27,6 @@ import android.widget.ImageView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView;
 
-import edu.stanford.junction.props2.Prop;
-import edu.stanford.junction.props2.IPropChangeListener;
-
 import org.json.JSONObject;
 
 import java.io.*;
@@ -44,7 +41,6 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 	private BroadcastReceiver mUriReceiver;
 	private BroadcastReceiver mErrorReceiver;
 	private ProgressDialog mUploadProgressDialog;
-	private IPropChangeListener mPropListener;
 
     public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -70,25 +66,11 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 				}
 			});
 
-		final Handler refreshHandler = new Handler(){
-				@Override
-				public void handleMessage(Message msg) {
-					super.handleMessage(msg);
-					refresh();
-				}
-			};
+		listenForAnyPropChange();
+		refresh();
+	}
 
-		JunctionApp app = (JunctionApp)getApplication();
-		Prop prop = app.getProp();
-		mPropListener = new IPropChangeListener(){
-				public String getType(){ return Prop.EVT_ANY; }
-				public void onChange(Object data){
-					refreshHandler.sendEmptyMessage(0);
-				}
-			};
-		prop.addChangeListener(mPropListener);
-
-
+	protected void onAnyPropChange(){
 		refresh();
 	}
 
@@ -266,10 +248,6 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 			stopService(i);
 		}
 		catch(IllegalArgumentException e){}
-
-		JunctionApp app = (JunctionApp)getApplication();
-		Prop prop = app.getProp();
-		prop.removeChangeListener(mPropListener);
 
 		mPics.clear();
 		mPics.recycle();

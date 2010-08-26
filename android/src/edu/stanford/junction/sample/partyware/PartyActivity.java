@@ -1,46 +1,18 @@
 package edu.stanford.junction.sample.partyware;
 
-import android.app.Activity;
-import android.app.NotificationManager;
-import android.app.Service;
-import android.app.ListActivity;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.ServiceConnection;
 import android.content.Intent;
-import android.content.ComponentName;
 import android.net.Uri;
-import android.os.IBinder;
-import android.os.Handler;
-import android.os.Message;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 import android.widget.Button;
-import android.widget.Toast;
-import android.widget.ArrayAdapter;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView;
-
-import edu.stanford.junction.extra.JSONObjWrapper;
-import edu.stanford.junction.props2.Prop;
-import edu.stanford.junction.props2.IPropChangeListener;
-
-import org.json.JSONObject;
-
-import java.net.URI;
-import java.util.*;
-import java.text.DateFormat;
-
 
 public class PartyActivity extends RichActivity{
 
 	public final static int REQUEST_CODE_SCAN_URL = 0;
 
 	private TextView mPartyName;
-	private IPropChangeListener mPropListener;
 
     public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -64,26 +36,15 @@ public class PartyActivity extends RichActivity{
 				}
 			});
 
-		final Handler refreshHandler = new Handler(){
-				@Override
-				public void handleMessage(Message msg) {
-					super.handleMessage(msg);
-					refresh();
-				}
-			};
-
-		JunctionApp app = (JunctionApp)getApplication();
-		Prop prop = app.getProp();
-		mPropListener = new IPropChangeListener(){
-				public String getType(){ return Prop.EVT_ANY; }
-				public void onChange(Object data){
-					refreshHandler.sendEmptyMessage(0);
-				}
-			};
-		prop.addChangeListener(mPropListener);
-
+	
+		listenForAnyPropChange();
 		refresh();
 	}
+
+	protected void onAnyPropChange(){
+		refresh();
+	}
+
 
 	private void refresh(){
 		JunctionApp app = (JunctionApp)getApplication();
@@ -113,9 +74,6 @@ public class PartyActivity extends RichActivity{
 
 	public void onDestroy(){
 		super.onDestroy();
-		JunctionApp app = (JunctionApp)getApplication();
-		Prop prop = app.getProp();
-		prop.removeChangeListener(mPropListener);
 	}
 
 }

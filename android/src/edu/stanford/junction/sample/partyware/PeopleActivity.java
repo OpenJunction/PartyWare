@@ -3,8 +3,6 @@ package edu.stanford.junction.sample.partyware;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Message;
-import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -15,11 +13,7 @@ import android.widget.ImageView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView;
 
-import edu.stanford.junction.props2.Prop;
-import edu.stanford.junction.props2.IPropChangeListener;
-
 import org.json.JSONObject;
-
 import java.util.*;
 
 
@@ -27,7 +21,6 @@ public class PeopleActivity extends RichListActivity implements OnItemClickListe
 
 	public final static int REQUEST_CODE_UPDATE_USER = 0;
 	private PeopleAdaptor mPeople;
-	private IPropChangeListener mPropListener;
 
     public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -44,28 +37,20 @@ public class PeopleActivity extends RichListActivity implements OnItemClickListe
 				}
 			});
 
-		final Handler refreshHandler = new Handler(){
-				@Override
-				public void handleMessage(Message msg) {
-					super.handleMessage(msg);
-					refresh();
-				}
-			};
-		JunctionApp app = (JunctionApp)getApplication();
-		Prop prop = app.getProp();
-		mPropListener = new IPropChangeListener(){
-				public String getType(){ return Prop.EVT_ANY; }
-				public void onChange(Object data){
-					refreshHandler.sendEmptyMessage(0);
-				}
-			};
-		prop.addChangeListener(mPropListener);
+		listenForAnyPropChange();
+		refresh();
+	}
 
+	protected void onAnyPropChange(){
 		refresh();
 	}
 
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id){
 		JSONObject o = mPeople.getItem(position);
+		String userId = o.optString("id");
+		Intent intent = new Intent(ViewProfileActivity.LAUNCH_INTENT);
+		intent.putExtra("user_id", userId);
+		startActivity(intent);
 	}
 
 	protected void updateProfile(){
@@ -108,11 +93,6 @@ public class PeopleActivity extends RichListActivity implements OnItemClickListe
 
 	public void onDestroy(){
 		super.onDestroy();
-
-		JunctionApp app = (JunctionApp)getApplication();
-		Prop prop = app.getProp();
-		prop.removeChangeListener(mPropListener);
-
 		mPeople.clear();
 		mPeople.recycle();
 	}

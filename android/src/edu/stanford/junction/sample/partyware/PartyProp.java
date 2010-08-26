@@ -60,6 +60,21 @@ public class PartyProp extends Prop {
 		return ((PartyState)getState()).getName();
 	}
 
+	public JSONObject getUser(String id){
+		PartyState s = (PartyState)getState();
+		return s.getUser(id);
+	}
+
+	public List<JSONObject> getRelationships(){
+		PartyState s = (PartyState)getState();
+		return s.getRelationships();
+	}
+
+	public JSONObject getRelationship(String fromId, String toId){
+		PartyState s = (PartyState)getState();
+		return s.getRelationship(fromId, toId);
+	}
+
 	public List<JSONObject> getImages(){
 		PartyState s = (PartyState)getState();
 		return s.getImages();
@@ -89,6 +104,20 @@ public class PartyProp extends Prop {
 
 	public void downvoteVideo(String id){
 		addOperation(newVoteOp(id, -1));
+	}
+
+	public void addRelationship(String fromUserId, String toUserId, String relType){
+		String id = PartyState.relationshipId(fromUserId, toUserId);
+		JSONObject obj = new JSONObject();
+		try{
+			obj.put("id", id);
+			obj.put("type", "relationship");
+			obj.put("from", fromUserId);
+			obj.put("to", toUserId);
+			obj.put("relType", relType);
+			obj.put("time", relType);
+		}catch(JSONException e){}
+		addObj(obj);
 	}
 
 	public void addYoutube(String userId, String videoId, String thumbUrl, String caption, long time){
@@ -187,6 +216,10 @@ public class PartyProp extends Prop {
 			this((PartyState)null);
 		}
 
+		public static String relationshipId(String fromUserId, String toUserId){
+			return "_" + fromUserId + "_to_" + toUserId + "_";
+		}
+
 		public String getName(){
 			return this.name;
 		}
@@ -272,10 +305,23 @@ public class PartyProp extends Prop {
 			return obj;
 		}
 
+		public JSONObject getUser(String id){
+			return objects.get(id);
+		}
+
 		public List<JSONObject> getImages(){
 			List<JSONObject> images = getObjectsOfType("image");
 			sortByTime(images, true);
 			return Collections.unmodifiableList(images);
+		}
+
+		public List<JSONObject> getRelationships(){
+			List<JSONObject> rels = getObjectsOfType("relationship");
+			return Collections.unmodifiableList(rels);
+		}
+
+		public JSONObject getRelationship(String fromId, String toId){
+			return objects.get(relationshipId(fromId, toId));
 		}
 
 		public List<JSONObject> getUsers(){
