@@ -1,31 +1,16 @@
 package edu.stanford.junction.sample.partyware;
 
-import edu.stanford.junction.sample.partyware.util.*;
-
-import android.content.Context;
 import android.os.Bundle;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.BroadcastReceiver;
-import android.app.ProgressDialog;
-import android.graphics.PixelFormat;
-import android.graphics.Bitmap;
-import android.hardware.Camera;
-import android.os.Handler;
-import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
 import android.widget.TextView;
 import android.widget.Spinner;
 import android.net.Uri;
-import android.util.Log;
 
-import java.io.*;
 import org.json.*;
 
 
@@ -39,6 +24,7 @@ public class ViewProfileActivity extends RichActivity{
 	private JSONObject mUser;
 	private String mId;
 	private Spinner mSpinner;
+	private ArrayAdapter mAdapter;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -70,20 +56,10 @@ public class ViewProfileActivity extends RichActivity{
 		relPrompt.setText("What is your relationship with " + name + "?");
 
 		mSpinner = (Spinner) findViewById(R.id.relationship_spinner);
-		ArrayAdapter adapter = ArrayAdapter.createFromResource(
+		mAdapter = ArrayAdapter.createFromResource(
             this, R.array.relationships, android.R.layout.simple_spinner_item);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		mSpinner.setAdapter(adapter);
-
-		// Set currently selected relationship
-		JSONObject rel = prop.getRelationship(mUser.optString("id"), mId);
-		if(rel != null){
-			String relType = rel.optString("relType");
-			int index = adapter.getPosition(relType);
-			if(index > -1){
-				mSpinner.setSelection(index);
-			}
-		}
+		mAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		mSpinner.setAdapter(mAdapter);
 
 		Button button = (Button)findViewById(R.id.finished_button);
 		button.setOnClickListener(new OnClickListener() {
@@ -101,7 +77,17 @@ public class ViewProfileActivity extends RichActivity{
 	}
 
 	protected void refresh(){
-		
+		JunctionApp app = (JunctionApp)getApplication();
+		PartyProp prop = app.getProp();
+		// Set currently selected relationship
+		JSONObject rel = prop.getRelationship(mUser.optString("id"), mId);
+		if(rel != null){
+			String relType = rel.optString("relType");
+			int index = mAdapter.getPosition(relType);
+			if(index > -1){
+				mSpinner.setSelection(index);
+			}
+		}
 	}
 
 	protected void confirm(){
