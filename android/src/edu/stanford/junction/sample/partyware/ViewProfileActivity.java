@@ -44,10 +44,11 @@ public class ViewProfileActivity extends RichActivity{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.view_profile);
 
-		Intent intent = getIntent();
-		mId = intent.getStringExtra("user_id");
 		JunctionApp app = (JunctionApp)getApplication();
 		PartyProp prop = app.getProp();
+
+		Intent intent = getIntent();
+		mId = intent.getStringExtra("user_id");
 		mUser = prop.getUser(mId);
 
 		mNameText = (TextView)findViewById(R.id.name_text);
@@ -74,6 +75,16 @@ public class ViewProfileActivity extends RichActivity{
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mSpinner.setAdapter(adapter);
 
+		// Set currently selected relationship
+		JSONObject rel = prop.getRelationship(mUser.optString("id"), mId);
+		if(rel != null){
+			String relType = rel.optString("relType");
+			int index = adapter.getPosition(relType);
+			if(index > -1){
+				mSpinner.setSelection(index);
+			}
+		}
+
 		Button button = (Button)findViewById(R.id.finished_button);
 		button.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
@@ -98,7 +109,9 @@ public class ViewProfileActivity extends RichActivity{
 		PartyProp prop = app.getProp();
 		String rel = (String)mSpinner.getSelectedItem();
 		if(rel != null && !(rel.equals("none"))){
-			prop.addRelationship(app.getUserId(), mId, rel);
+			String[] rels = getResources().getStringArray(R.array.relationships);
+			String[] revRels = getResources().getStringArray(R.array.reverse_relationships);
+			prop.addRelationship(rels, revRels, app.getUserId(), mId, rel);
 		}
 		finish();
 	}

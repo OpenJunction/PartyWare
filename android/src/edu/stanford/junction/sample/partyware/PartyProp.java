@@ -106,7 +106,19 @@ public class PartyProp extends Prop {
 		addOperation(newVoteOp(id, -1));
 	}
 
-	public void addRelationship(String fromUserId, String toUserId, String relType){
+	public void addRelationship(String[] relationships, String[] reverseRelationships, String fromUserId, String toUserId, String relType){
+		List<String> rels = Arrays.asList(relationships);
+		List<String> reverseRels = Arrays.asList(reverseRelationships);
+		if(!(rels.contains(relType))){
+			throw new IllegalStateException("Unknown relationship type: " + relType);
+		}
+		int index = rels.indexOf(relType);
+		String reverseRelType = reverseRels.get(index);
+		addObj(newRelationship(fromUserId, toUserId, relType));
+		addObj(newRelationship(toUserId, fromUserId, reverseRelType));
+	}
+
+	protected JSONObject newRelationship(String fromUserId, String toUserId, String relType){
 		String id = PartyState.relationshipId(fromUserId, toUserId);
 		JSONObject obj = new JSONObject();
 		try{
@@ -115,9 +127,8 @@ public class PartyProp extends Prop {
 			obj.put("from", fromUserId);
 			obj.put("to", toUserId);
 			obj.put("relType", relType);
-			obj.put("time", relType);
 		}catch(JSONException e){}
-		addObj(obj);
+		return obj;
 	}
 
 	public void addYoutube(String userId, String videoId, String thumbUrl, String caption, long time){
