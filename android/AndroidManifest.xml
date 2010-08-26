@@ -90,7 +90,8 @@
     </activity>
 
     <activity android:name="edu.stanford.junction.sample.partyware.UpdateProfileActivity"
-	      android:label="@string/view_picture">
+	      android:label="@string/view_picture"
+	      android:screenOrientation="portrait">
       <intent-filter>
 	<action android:name="edu.stanford.junction.sample.partyware.UPDATE_PROFILE" />
 	<category android:name="android.intent.category.DEFAULT" />
