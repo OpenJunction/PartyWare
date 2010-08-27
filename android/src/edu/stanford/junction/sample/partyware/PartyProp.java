@@ -446,9 +446,9 @@ public class PartyProp extends Prop {
 			}
 		}
 
-		// Result should map toIds to path strings 
-		// that describe the path from fromId to toId.
-
+		// Result should map each userId id to paths consisting of the chain of userIds
+		// starting at sourceId (non-inclusive) and continuing to id (inclusive).
+		//
 		// Run Dijkstra's Alg. on relationship graph. All edges have cost 1
 		public Map<String,List<String>> computeShortestPaths(final String sourceId){
 
@@ -490,7 +490,8 @@ public class PartyProp extends Prop {
 			// Source has 0 cost
 			QEl source = new QEl(sourceId, 0L);
 
-			// XXX This is a work-around for bug 6207984 on oracle's java bug list
+			// XXX This is a work-around for bug 6207984 on oracle's java bug list.
+			// would like to just use q.remove(source)
 			q.removeAll(Collections.singletonList(source));
 
 			q.offer(source);
