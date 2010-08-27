@@ -21,6 +21,7 @@ public class PeopleActivity extends RichListActivity implements OnItemClickListe
 
 	public final static int REQUEST_CODE_UPDATE_USER = 0;
 	private PeopleAdaptor mPeople;
+	private Map<String,List<String>> mPaths;
 
     public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -83,11 +84,16 @@ public class PeopleActivity extends RichListActivity implements OnItemClickListe
 	private void refresh(){
 		JunctionApp app = (JunctionApp)getApplication();
 		PartyProp prop = app.getProp();
+
+		mPaths = prop.computeShortestPaths(app.getUserId());
+
 		List<JSONObject> users = prop.getUsers();
 		mPeople.clear();
 		for(JSONObject a : users){
 			mPeople.add(a);
 		}
+
+
 	}
 
 
@@ -114,17 +120,24 @@ public class PeopleActivity extends RichListActivity implements OnItemClickListe
 			}
 			JSONObject o = getItem(position);
 			if (o != null) {
+				String id = o.optString("id");
+				JunctionApp app = (JunctionApp)getApplication();
+				String selfId = app.getUserId();
+
 				TextView tt = (TextView) v.findViewById(R.id.toptext);
 				String name = o.optString("name");
 				tt.setText(name);
 
 				TextView bt = (TextView) v.findViewById(R.id.bottomtext);
-				String email = o.optString("email");
-				bt.setText(email);
+				List<String> path = mPaths.get(id);
+				if(path != null){
+					bt.setText(path.size() + " degrees away");
+				}
 
 				final ImageView icon = (ImageView)v.findViewById(R.id.icon);
 				final String url = o.optString("imageUrl");
 				loadImage(icon, url);
+
 			}
 			return v;
 		}

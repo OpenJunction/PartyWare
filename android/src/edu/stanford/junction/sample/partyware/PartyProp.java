@@ -37,18 +37,45 @@ public class PartyProp extends Prop {
 		return obj;
 	}
 
+	protected JSONObject newDeleteObjOp(JSONObject item){
+		JSONObject obj = new JSONObject();
+		try{
+			obj.put("type", "deleteObj");
+			obj.put("itemId", item.optString("id"));
+		}catch(JSONException e){}
+		return obj;
+	}
+
+	protected JSONObject newDeleteObjOp(String itemId){
+		JSONObject obj = new JSONObject();
+		try{
+			obj.put("type", "deleteObj");
+			obj.put("itemId", itemId);
+		}catch(JSONException e){}
+		return obj;
+	}
+
 	protected JSONObject newVoteOp(String itemId, int count){
 		JSONObject obj = new JSONObject();
 		try{
 			obj.put("type", "vote");
 			obj.put("itemId", itemId);
 			obj.put("count", count);
-		}catch(JSONException e){}
+		}
+		catch(JSONException e){}
 		return obj;
 	}
 
 	protected void addObj(JSONObject item){
 		addOperation(newAddObjOp(item));
+	}
+
+	protected void deleteObj(JSONObject item){
+		addOperation(newDeleteObjOp(item));
+	}
+
+	protected void deleteObj(String itemId){
+		addOperation(newDeleteObjOp(itemId));
 	}
 
 
@@ -73,6 +100,36 @@ public class PartyProp extends Prop {
 	public JSONObject getRelationship(String fromId, String toId){
 		PartyState s = (PartyState)getState();
 		return s.getRelationship(fromId, toId);
+	}
+
+	public Map<String,List<String>> computeShortestPaths(final String sourceId){
+		PartyState s = (PartyState)getState();
+		return s.computeShortestPaths(sourceId);
+	}
+
+	public String prettyPathString(final String selfId, final List<String> path){
+		if(path.isEmpty()){
+			return "No path.";
+		}
+		else{
+			String pathStr = "";
+			String curId = selfId;
+			for (String id : path){
+				JSONObject rel = getRelationship(curId, id);
+				String relType = rel.optString("relType");
+				JSONObject user = getUser(id);
+				String name = user.optString("name");
+				if(curId.equals(selfId)){
+					pathStr = "You are a " + relType + " of " + name + pathStr;
+					break;
+				}
+				else{
+					pathStr = ", who is a " + relType + " of " + name + pathStr;
+				}
+				curId = id;
+			}
+			return pathStr;
+		}
 	}
 
 	public List<JSONObject> getImages(){
@@ -118,6 +175,11 @@ public class PartyProp extends Prop {
 		addObj(newRelationship(toUserId, fromUserId, reverseRelType));
 	}
 
+	public void deleteRelationship(String fromUserId, String toUserId){
+		deleteObj(PartyState.relationshipId(fromUserId, toUserId));
+		deleteObj(PartyState.relationshipId(toUserId, fromUserId));
+	}
+
 	protected JSONObject newRelationship(String fromUserId, String toUserId, String relType){
 		String id = PartyState.relationshipId(fromUserId, toUserId);
 		JSONObject obj = new JSONObject();
@@ -127,7 +189,8 @@ public class PartyProp extends Prop {
 			obj.put("from", fromUserId);
 			obj.put("to", toUserId);
 			obj.put("relType", relType);
-		}catch(JSONException e){}
+		}
+		catch(JSONException e){}
 		return obj;
 	}
 
@@ -181,9 +244,9 @@ public class PartyProp extends Prop {
 	}
 
 
-	//////////////////////////
-    // The State definition //
-    //////////////////////////
+//////////////////////////
+// The State definition //
+//////////////////////////
 
 	static class PartyState implements IPropState {
 
@@ -333,6 +396,117 @@ public class PartyProp extends Prop {
 
 		public JSONObject getRelationship(String fromId, String toId){
 			return objects.get(relationshipId(fromId, toId));
+		}
+
+		class QEl implements Comparable<QEl>{
+			final public String id;
+			final public Integer dist;
+			public QEl(String id, Integer dist){
+				this.id = id;
+				this.dist = dist;
+			}
+			public int compareTo(QEl el){
+				return this.dist - el.dist;
+			}
+			public int hashCode(){
+				return id.hashCode();
+			}
+			public boolean equals(Object el){
+				if(el instanceof QEl){
+					QEl e = (QEl)el;
+					return this.id.equals(e.id);
+				}
+				else{
+					return false;
+				}
+			}
+		}
+
+		class Q extends PriorityQueue<QEl>{
+			public boolean add(QEl el) {
+				if (contains(el)) {
+					return false; 
+				} else {
+					return super.add(el);
+				}
+			}
+		}
+
+		// Result should map toIds to path strings 
+		// that describe the path from fromId to toId.
+
+		// Run Dijkstra's Alg. on relationship graph. All edges have cost 1
+		public Map<String,List<String>> computeShortestPaths(final String sourceId){
+
+			Map<String,Integer> dist = new HashMap<String,Integer>();
+			Map<String,String> previous = new HashMap<String,String>();
+			Map<String,Set<String>> neighbors = new HashMap<String,Set<String>>();
+			Q q = new Q();
+
+
+			// Dijkstra initialization
+			Iterator<JSONObject> it = objects.values().iterator();
+			while (it.hasNext()) {
+				JSONObject ea = it.next();
+				String type = ea.optString("type");
+
+				// For each edge..
+				if(type.equals("relationship")){
+					String fromId = ea.optString("from");
+					String toId = ea.optString("to");
+
+					// Add each node to q
+					// Init the dist structure
+					if(fromId.equals(sourceId)){
+						q.add(new QEl(fromId, 0));
+						dist.put(fromId, 0);
+					}
+					else{
+						q.add(new QEl(fromId, Integer.MAX_VALUE));
+						dist.put(fromId, Integer.MAX_VALUE);
+					}
+				
+					// Update neighbors
+					Set<String> neibs = neighbors.get(fromId);
+					if(neibs == null) neibs = new HashSet<String>();
+					neibs.add(toId);
+					neighbors.put(fromId, neibs);
+				}
+			}
+
+			// Dijkstra run..
+			while(!(q.isEmpty())){
+				QEl u = q.poll();
+				if(u.dist == Integer.MAX_VALUE){
+					break;
+				}
+				Set<String> neibs = neighbors.get(u.id);
+				for(String vId : neibs){
+					QEl helper = new QEl(vId, 0);
+					if(q.contains(helper)){
+						int alt = dist.get(u.id) + 1;
+						if(alt < dist.get(vId)){
+							dist.put(vId, alt);
+							previous.put(vId, u.id);
+						}
+					}
+				}
+			}
+
+			// Reconstruct the result paths from contents of previous.
+			Map<String,List<String>> result = new HashMap<String,List<String>>();
+			for (Map.Entry<String, String> entry : previous.entrySet()){
+				ArrayList<String> path = new ArrayList<String>();
+				String destination = entry.getKey();
+				String id = destination;
+				while(id != sourceId){
+					path.add(0, id);
+					id = previous.get(id);
+				}
+				Collections.reverse(path);
+				result.put(destination, path);
+			}
+			return result;
 		}
 
 		public List<JSONObject> getUsers(){
