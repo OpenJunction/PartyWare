@@ -131,7 +131,15 @@ public class PeopleActivity extends RichListActivity implements OnItemClickListe
 				TextView bt = (TextView) v.findViewById(R.id.bottomtext);
 				List<String> path = mPaths.get(id);
 				if(path != null){
-					bt.setText(path.size() + " degrees away");
+					if(path.size() == 0){
+						bt.setText("");
+					}
+					else{
+						bt.setText(path.size() + " degree(s) away");
+					}
+				}
+				else{
+					bt.setText("No connection.");
 				}
 
 				final ImageView icon = (ImageView)v.findViewById(R.id.icon);

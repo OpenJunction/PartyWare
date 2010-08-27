@@ -107,28 +107,30 @@ public class PartyProp extends Prop {
 		return s.computeShortestPaths(sourceId);
 	}
 
+	// Note: empty path means it's the path from self to self.
 	public String prettyPathString(final String selfId, final List<String> path){
 		if(path.isEmpty()){
-			return "No path.";
+			return "It's you!";
 		}
 		else{
 			String pathStr = "";
 			String curId = selfId;
-			for (String id : path){
-				JSONObject rel = getRelationship(curId, id);
+			for(String id : path){
+				JSONObject rel = getRelationship(id, curId);
 				String relType = rel.optString("relType");
 				JSONObject user = getUser(id);
 				String name = user.optString("name");
+				String a = relType.matches("^[aeiou].+") ? "an" : "a";
 				if(curId.equals(selfId)){
-					pathStr = "You are a " + relType + " of " + name + pathStr;
+					pathStr = "You are " + a + " " + relType + " of " + name + pathStr;
 					break;
 				}
 				else{
-					pathStr = ", who is a " + relType + " of " + name + pathStr;
+					pathStr = ", who is " + a + " " + relType + " of " + name + pathStr;
 				}
 				curId = id;
 			}
-			return pathStr;
+			return pathStr + ".";
 		}
 	}
 
@@ -400,17 +402,24 @@ public class PartyProp extends Prop {
 
 		class QEl implements Comparable<QEl>{
 			final public String id;
-			final public Integer dist;
-			public QEl(String id, Integer dist){
+			final public long dist;
+
+			public QEl(String id, long dist){
 				this.id = id;
 				this.dist = dist;
 			}
+
+			@Override
 			public int compareTo(QEl el){
-				return this.dist - el.dist;
+				if(this.dist < el.dist) return -1;
+				if(this.dist > el.dist) return 1;
+				return 0;
 			}
+			@Override
 			public int hashCode(){
 				return id.hashCode();
 			}
+			@Override
 			public boolean equals(Object el){
 				if(el instanceof QEl){
 					QEl e = (QEl)el;
@@ -420,14 +429,19 @@ public class PartyProp extends Prop {
 					return false;
 				}
 			}
+			@Override
+			public String toString(){
+				return id + "@" + dist;
+			}
 		}
 
 		class Q extends PriorityQueue<QEl>{
-			public boolean add(QEl el) {
+			@Override
+			public boolean offer(QEl el) {
 				if (contains(el)) {
-					return false; 
+					return false;
 				} else {
-					return super.add(el);
+					return super.offer(el);
 				}
 			}
 		}
@@ -438,13 +452,14 @@ public class PartyProp extends Prop {
 		// Run Dijkstra's Alg. on relationship graph. All edges have cost 1
 		public Map<String,List<String>> computeShortestPaths(final String sourceId){
 
-			Map<String,Integer> dist = new HashMap<String,Integer>();
+			Map<String,Long> dist = new HashMap<String,Long>();
 			Map<String,String> previous = new HashMap<String,String>();
 			Map<String,Set<String>> neighbors = new HashMap<String,Set<String>>();
 			Q q = new Q();
 
 
 			// Dijkstra initialization
+
 			Iterator<JSONObject> it = objects.values().iterator();
 			while (it.hasNext()) {
 				JSONObject ea = it.next();
@@ -457,16 +472,14 @@ public class PartyProp extends Prop {
 
 					// Add each node to q
 					// Init the dist structure
-					if(fromId.equals(sourceId)){
-						q.add(new QEl(fromId, 0));
-						dist.put(fromId, 0);
-					}
-					else{
-						q.add(new QEl(fromId, Integer.MAX_VALUE));
-						dist.put(fromId, Integer.MAX_VALUE);
-					}
+					q.offer(new QEl(fromId, (long)Integer.MAX_VALUE));
+					q.offer(new QEl(toId, (long)Integer.MAX_VALUE));
+
+					dist.put(fromId, (long)Integer.MAX_VALUE);
+					dist.put(toId, (long)Integer.MAX_VALUE);
 				
-					// Update neighbors
+					// Update neighbors of from node 
+					// (relations are one-directional)
 					Set<String> neibs = neighbors.get(fromId);
 					if(neibs == null) neibs = new HashSet<String>();
 					neibs.add(toId);
@@ -474,20 +487,37 @@ public class PartyProp extends Prop {
 				}
 			}
 
+			// Source has 0 cost
+			QEl source = new QEl(sourceId, 0L);
+
+			// XXX This is a work-around for bug 6207984 on oracle's java bug list
+			q.removeAll(Collections.singletonList(source));
+
+			q.offer(source);
+			dist.put(sourceId, 0L);
+
+			// The null path
+			previous.put(sourceId, sourceId);
+
 			// Dijkstra run..
 			while(!(q.isEmpty())){
 				QEl u = q.poll();
-				if(u.dist == Integer.MAX_VALUE){
+				if(u.dist == (long)Integer.MAX_VALUE){
 					break;
 				}
 				Set<String> neibs = neighbors.get(u.id);
-				for(String vId : neibs){
-					QEl helper = new QEl(vId, 0);
-					if(q.contains(helper)){
-						int alt = dist.get(u.id) + 1;
-						if(alt < dist.get(vId)){
-							dist.put(vId, alt);
-							previous.put(vId, u.id);
+				if(neibs != null){
+					for(String vId : neibs){
+						QEl tmp = new QEl(vId, 0L);
+						if(q.contains(tmp)){
+
+							// Note, edge cost is constant 1
+							long alt = dist.get(u.id) + 1;
+
+							if(alt < dist.get(vId)){
+								dist.put(vId, alt);
+								previous.put(vId, u.id);
+							}
 						}
 					}
 				}
@@ -499,8 +529,8 @@ public class PartyProp extends Prop {
 				ArrayList<String> path = new ArrayList<String>();
 				String destination = entry.getKey();
 				String id = destination;
-				while(id != sourceId){
-					path.add(0, id);
+				while(!(id.equals(sourceId))){
+					path.add(id);
 					id = previous.get(id);
 				}
 				Collections.reverse(path);

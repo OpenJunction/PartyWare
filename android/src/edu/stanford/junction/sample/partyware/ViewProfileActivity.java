@@ -27,8 +27,8 @@ public class ViewProfileActivity extends RichActivity{
 	private JSONObject mUser;
 	private String mId;
 	private Spinner mSpinner;
-	private ArrayAdapter mAdapter;
-	private boolean mDisableSpinnerEvents = false;
+	private ArrayAdapter mSpinnerAdapter;
+	private boolean mEnableSpinnerEvents = false;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -59,13 +59,30 @@ public class ViewProfileActivity extends RichActivity{
 		}
 
 		TextView relPrompt = (TextView)findViewById(R.id.relationship_prompt);
-		relPrompt.setText("What is your relationship with " + name + "?");
+		relPrompt.setText("What is " + name + " to you?");
+
 
 		mSpinner = (Spinner) findViewById(R.id.relationship_spinner);
-		mAdapter = ArrayAdapter.createFromResource(
+		mSpinnerAdapter = ArrayAdapter.createFromResource(
             this, R.array.relationships, android.R.layout.simple_spinner_item);
-		mAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		mSpinner.setAdapter(mAdapter);
+		mSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		mSpinner.setAdapter(mSpinnerAdapter);
+
+		// Set currently selected relationship
+		JSONObject rel = prop.getRelationship(app.getUserId(), mId);
+		if(rel != null){
+			String relType = rel.optString("relType");
+			int index = mSpinnerAdapter.getPosition(relType);
+			if(index > -1){
+				mSpinner.setSelection(index);
+			}
+			else{
+				mSpinner.setSelection(0);
+			}
+		}
+		else{
+			mSpinner.setSelection(0);
+		}
 
 		mSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
 				@Override
@@ -73,26 +90,31 @@ public class ViewProfileActivity extends RichActivity{
 					AdapterView<?> parentView,
 					View selectedItemView,
 					int position, long id){
-					if(!mDisableSpinnerEvents){
+
+					// YUCK Ignore the first event (triggered by setSelection)
+					if(mEnableSpinnerEvents){
 						PartyProp prop = app.getProp();
-						String rel = (String)mSpinner.getSelectedItem();
+						String rel = (String)mSpinnerAdapter.getItem(position);
 						if(rel == null || rel.equals("none")){
 							prop.deleteRelationship(app.getUserId(), mId);
 						}
 						else{
+							System.out.println("Adding rel: " + rel);
 							String[] rels = getResources().getStringArray(R.array.relationships);
 							String[] revRels = getResources().getStringArray(R.array.reverse_relationships);
 							prop.addRelationship(rels, revRels, app.getUserId(), mId, rel);
 						}
+					}
+					else{
+						mEnableSpinnerEvents = true;
 					}
 				}
 				@Override
 				public void onNothingSelected(AdapterView<?> parentView) {}
 			});
 
-
 		TextView pathTitle = (TextView)findViewById(R.id.path_title);
-		pathTitle.setText("Path to " + name + ":");
+		pathTitle.setText("Shortest path to " + name + ":");
 
 		Button button = (Button)findViewById(R.id.finished_button);
 		button.setOnClickListener(new OnClickListener() {
@@ -100,6 +122,15 @@ public class ViewProfileActivity extends RichActivity{
 					confirm();
 				}
 			});
+
+		TextView pathText = (TextView)findViewById(R.id.path);
+
+		if(mId.equals(app.getUserId())){
+			mSpinner.setVisibility(View.GONE);
+			pathTitle.setVisibility(View.GONE);
+			pathText.setVisibility(View.GONE);
+			relPrompt.setVisibility(View.GONE);
+		}
 
 		listenForAnyPropChange();
 		refresh();
@@ -112,18 +143,8 @@ public class ViewProfileActivity extends RichActivity{
 	protected void refresh(){
 		JunctionApp app = (JunctionApp)getApplication();
 		PartyProp prop = app.getProp();
-		// Set currently selected relationship
-		JSONObject rel = prop.getRelationship(mUser.optString("id"), mId);
-		if(rel != null){
-			String relType = rel.optString("relType");
-			int index = mAdapter.getPosition(relType);
-			if(index > -1){
-				mDisableSpinnerEvents = true;
-				mSpinner.setSelection(index);
-				mDisableSpinnerEvents = false;
-			}
-		}
 		String selfId = app.getUserId();
+
 		Map<String,List<String>> paths = prop.computeShortestPaths(selfId);
 		List<String> path = paths.get(mId);
 		TextView tv = (TextView)findViewById(R.id.path);
@@ -134,7 +155,6 @@ public class ViewProfileActivity extends RichActivity{
 		else{
 			tv.setText("No path");
 		}
-		
 	}
 
 	protected void confirm(){
