@@ -54,7 +54,7 @@
       android:text="Name:"
       android:textStyle="bold"
       />
-  <EditText
+  <AutoCompleteTextView
       android:id="@+id/name_text"
       android:layout_width="fill_parent"
       android:layout_height="50dip"
@@ -75,7 +75,7 @@
       android:text="Email:"
       android:textStyle="bold"
       />
-  <EditText
+  <AutoCompleteTextView
       android:id="@+id/email_text"
       android:layout_width="fill_parent"
       android:layout_height="50dip"

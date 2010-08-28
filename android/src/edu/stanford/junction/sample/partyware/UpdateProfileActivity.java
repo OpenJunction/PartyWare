@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -33,8 +34,8 @@ public class UpdateProfileActivity extends RichActivity{
 	public final static int REQUEST_CODE_TAKE_PICTURE = 1;
 
 	private Uri mPortraitUri;
-	private EditText mNameText;
-	private EditText mEmailText;
+	private AutoCompleteTextView mNameText;
+	private AutoCompleteTextView mEmailText;
 	private ImageView mPortraitView;
 	private ProgressDialog mUploadProgressDialog;
 	private BroadcastReceiver mUriReceiver;
@@ -46,23 +47,24 @@ public class UpdateProfileActivity extends RichActivity{
 
 		setContentView(R.layout.update_profile);
 
-		mNameText = (EditText)findViewById(R.id.name_text);
-		mEmailText = (EditText)findViewById(R.id.email_text);
-		mPortraitView = (ImageView)findViewById(R.id.image);
-		mPortraitView.setImageResource(R.drawable.ellipsis);
-
 		Intent intent = getIntent();
 
+		mNameText = (AutoCompleteTextView)findViewById(R.id.name_text);
 		String name = intent.getStringExtra("name");
 		if(name != null){
 			mNameText.setText(intent.getStringExtra("name"));
 		}
+		mNameText.setAdapter(new ContactsAutoCompleteCursorAdapter.NameAdapter(this));
 
+		mEmailText = (AutoCompleteTextView)findViewById(R.id.email_text);
 		String email = intent.getStringExtra("email");
 		if(email != null){
 			mEmailText.setText(intent.getStringExtra("email"));
 		}
+		mEmailText.setAdapter(new ContactsAutoCompleteCursorAdapter.EmailAdapter(this));
 
+		mPortraitView = (ImageView)findViewById(R.id.image);
+		mPortraitView.setImageResource(R.drawable.ellipsis);
 		String uri = intent.getStringExtra("image_url");
 		if(uri != null){
 			mPortraitUri = Uri.parse(uri);

@@ -1,10 +1,12 @@
 * Imgur pro account
-* Don't show relationship spinner for self
-* Show inferred relationship string in View Profile
-* Show calculated hop-count in list view.
+
 * Populate update profile fields from contacts (and auto-complete)
+
 * Add people to android contacts
+
 * Add owner names to content
+
 * Periodically (and on demand) save (state,state#,sessionId) snapshots to db
+
 * Add Load Recent Party button
 
