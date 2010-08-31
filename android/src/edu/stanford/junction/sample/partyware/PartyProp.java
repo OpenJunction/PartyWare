@@ -122,11 +122,10 @@ public class PartyProp extends Prop {
 				String name = user.optString("name");
 				String a = relType.matches("^[aeiou].+") ? "an" : "a";
 				if(curId.equals(selfId)){
-					pathStr = "You are " + a + " " + relType + " of " + name + pathStr;
-					break;
+					pathStr = "You are " + a + " " + relType + " of " + name;
 				}
 				else{
-					pathStr = ", who is " + a + " " + relType + " of " + name + pathStr;
+					pathStr = pathStr + ", who is " + a + " " + relType + " of " + name;
 				}
 				curId = id;
 			}
@@ -444,6 +443,21 @@ public class PartyProp extends Prop {
 					return super.offer(el);
 				}
 			}
+			public boolean update(QEl el, long value) {
+				if (!contains(el)) {
+					return false;
+				} else {
+					remove(el);
+					offer(new QEl(el.id, value));
+					return true;
+				}
+			}
+
+			public boolean remove(Object el){
+				// XXX This is a work-around for bug 6207984 on oracle's java bug list.
+				// would like to just use q.remove(source)
+				return removeAll(Collections.singletonList(el));
+			}
 		}
 
 		// Result should map each userId id to paths consisting of the chain of userIds
@@ -489,11 +503,7 @@ public class PartyProp extends Prop {
 
 			// Source has 0 cost
 			QEl source = new QEl(sourceId, 0L);
-
-			// XXX This is a work-around for bug 6207984 on oracle's java bug list.
-			// would like to just use q.remove(source)
-			q.removeAll(Collections.singletonList(source));
-
+			q.remove(source);
 			q.offer(source);
 			dist.put(sourceId, 0L);
 
@@ -503,6 +513,7 @@ public class PartyProp extends Prop {
 			// Dijkstra run..
 			while(!(q.isEmpty())){
 				QEl u = q.poll();
+				System.out.println("looking at " + u);
 				if(u.dist == (long)Integer.MAX_VALUE){
 					break;
 				}
@@ -510,13 +521,15 @@ public class PartyProp extends Prop {
 				if(neibs != null){
 					for(String vId : neibs){
 						QEl tmp = new QEl(vId, 0L);
+						System.out.println("looking neighbor " + tmp);
 						if(q.contains(tmp)){
-
+							
 							// Note, edge cost is constant 1
 							long alt = dist.get(u.id) + 1;
-
+							
 							if(alt < dist.get(vId)){
 								dist.put(vId, alt);
+								q.update(tmp, alt);
 								previous.put(vId, u.id);
 							}
 						}
@@ -530,10 +543,13 @@ public class PartyProp extends Prop {
 				ArrayList<String> path = new ArrayList<String>();
 				String destination = entry.getKey();
 				String id = destination;
+				System.out.println("[ ");
 				while(!(id.equals(sourceId))){
+					System.out.println("entry on path " + id);
 					path.add(id);
 					id = previous.get(id);
 				}
+				System.out.println("]");
 				Collections.reverse(path);
 				result.put(destination, path);
 			}

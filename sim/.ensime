@@ -1,0 +1,11 @@
+;; This config was generated using ensime-config-gen. Feel free to customize its contents manually. 
+
+(
+
+:server-root "/home/aemon/src/misc/ensime/dist/"
+
+:project-package ""
+
+:use-sbt t
+
+)
