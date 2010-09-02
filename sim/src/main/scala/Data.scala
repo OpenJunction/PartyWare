@@ -5,10 +5,15 @@ import scala.collection.JavaConversions._
 
 object Data{
 
-  def randomUserIdInProp(prop:PartyProp) = {
+  def randomUserInProp(prop:PartyProp) = {
     val users: List[JSONObject] = prop.getUsers.toList
-    val user = shuffle(users).head
-    user.optString("id")
+    shuffle(users).head
+  }
+
+
+  def randomVideoInProp(prop:PartyProp) = {
+    val vids: List[JSONObject] = prop.getYoutubeVids.toList
+    shuffle(vids).head
   }
 
 

@@ -28,34 +28,9 @@ object Main {
   val users: ListBuffer[User] = ListBuffer()
 
   def main(args: Array[String]) {
-    for (i <- 1 until 5) {
+    for (i <- 1 until 10) {
       newUser(i)
     }
-  }
-
-  def testGraph() {
-    val prop = new PartyProp("test")
-    for (i <- (1 until 10)) {
-      prop.updateUser("id" + i, "name" + i, "", randomPortrait)
-    }
-    val me = "X"
-    prop.updateUser(me, "aemon", "", randomPortrait)
-    prop.addRelationship(relations.toArray,
-      reverseRelations.toArray, me, "id1", randomRelation)
-    prop.addRelationship(relations.toArray,
-      reverseRelations.toArray, "id1", "id2", randomRelation)
-    println(prop.getRelationship(me, "id1"))
-
-    val paths = prop.computeShortestPaths(me)
-
-    val pathTo1 = paths.toMap.get("id1")
-    for (p <- pathTo1)
-      println(prop.prettyPathString(me, p))
-
-    val pathTo2 = paths.toMap.get("id2")
-    for (p <- pathTo2)
-      println(prop.prettyPathString(me, p))
-
   }
 
   def newUser(i: Int) {
@@ -148,15 +123,24 @@ class User(i: Int) extends Actor {
           case Wakeup() => {
             doWithProb((0.05, { () =>
               prop.addImage(id, randomImage, randomImage, "...", (new Date()).getTime() / 1000)
-            }), (0.05, { () =>
+            }), (0.03, { () =>
               val vid = randomVideo
               val thumb = "http://img.youtube.com/vi/" + vid + "/default.jpg";
               prop.addYoutube(id, vid, thumb, "...", (new Date()).getTime() / 1000)
-            }), (0.05, { () =>
+            }), (0.03, { () =>
+              val id = randomVideoInProp(prop).optString("id")
+              prop.upvoteVideo(id)
+            }), (0.03, { () =>
+              val id = randomVideoInProp(prop).optString("id")
+              prop.downvoteVideo(id)
+            }), (0.03, { () =>
               prop.updateUser(id, name, "", thumb)
-            }), (0.05, { () =>
-              prop.addRelationship(relations.toArray, reverseRelations.toArray, id, randomUserIdInProp(prop), randomRelation)
-            }), (0.7, { () =>
+            }), (0.03, { () =>
+	      val toId = randomUserInProp(prop).optString("id")
+              prop.addRelationship(
+		relations.toArray, 
+		reverseRelations.toArray, 
+		id, toId, randomRelation)
             }))
           }
           case msg => {

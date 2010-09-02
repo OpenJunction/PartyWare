@@ -8,6 +8,9 @@ import edu.stanford.junction.extra.JSONObjWrapper;
 
 public class PartyProp extends Prop {
 
+	// A client-only helper to prevent multiple votes for the same vid
+	private HashSet<String> voteHistory = new HashSet<String>();
+
 	public PartyProp(String propName, String propReplicaName, IPropState s){
 		super(propName, propReplicaName, s);
 	}
@@ -84,27 +87,43 @@ public class PartyProp extends Prop {
     /////////////////////////
 
 	public String getName(){
-		return ((PartyState)getState()).getName();
+		return withState(new IWithStateAction<String>(){
+				public String run(IPropState state){
+					return ((PartyState)state).getName();
+				}
+			});
 	}
 
-	public JSONObject getUser(String id){
-		PartyState s = (PartyState)getState();
-		return s.getUser(id);
+	public JSONObject getUser(final String id){
+		return withState(new IWithStateAction<JSONObject>(){
+				public JSONObject run(IPropState state){
+					return ((PartyState)state).getUser(id);
+				}
+			});
 	}
 
 	public List<JSONObject> getRelationships(){
-		PartyState s = (PartyState)getState();
-		return s.getRelationships();
+		return withState(new IWithStateAction<List<JSONObject>>(){
+				public List<JSONObject> run(IPropState state){
+					return ((PartyState)state).getRelationships();
+				}
+			});
 	}
 
-	public JSONObject getRelationship(String fromId, String toId){
-		PartyState s = (PartyState)getState();
-		return s.getRelationship(fromId, toId);
+	public JSONObject getRelationship(final String fromId, final String toId){
+		return withState(new IWithStateAction<JSONObject>(){
+				public JSONObject run(IPropState state){
+					return ((PartyState)state).getRelationship(fromId, toId);
+				}
+			});
 	}
 
 	public Map<String,List<String>> computeShortestPaths(final String sourceId){
-		PartyState s = (PartyState)getState();
-		return s.computeShortestPaths(sourceId);
+		return withState(new IWithStateAction<Map<String,List<String>>>(){
+				public Map<String,List<String>> run(IPropState state){
+					return ((PartyState)state).computeShortestPaths(sourceId);
+				}
+			});
 	}
 
 	// Note: empty path means it's the path from self to self.
@@ -134,18 +153,27 @@ public class PartyProp extends Prop {
 	}
 
 	public List<JSONObject> getImages(){
-		PartyState s = (PartyState)getState();
-		return s.getImages();
+		return withState(new IWithStateAction<List<JSONObject>>(){
+				public List<JSONObject> run(IPropState state){
+					return ((PartyState)state).getImages();
+				}
+			});
 	}
 
 	public List<JSONObject> getUsers(){
-		PartyState s = (PartyState)getState();
-		return s.getUsers();
+		return withState(new IWithStateAction<List<JSONObject>>(){
+				public List<JSONObject> run(IPropState state){
+					return ((PartyState)state).getUsers();
+				}
+			});
 	}
 
 	public List<JSONObject> getYoutubeVids(){
-		PartyState s = (PartyState)getState();
-		return s.getYoutubeVids();
+		return withState(new IWithStateAction<List<JSONObject>>(){
+				public List<JSONObject> run(IPropState state){
+					return ((PartyState)state).getYoutubeVids();
+				}
+			});
 	}
 
 	public void updateUser(String userId, String name, String email, String imageUrl){
@@ -157,11 +185,21 @@ public class PartyProp extends Prop {
 	}
 
 	public void upvoteVideo(String id){
-		addOperation(newVoteOp(id, 1));
+		if(!(voteHistory.contains(id))){
+			addOperation(newVoteOp(id, 1));
+			voteHistory.add(id);
+		}
 	}
 
 	public void downvoteVideo(String id){
-		addOperation(newVoteOp(id, -1));
+		if(!(voteHistory.contains(id))){
+			addOperation(newVoteOp(id, -1));
+			voteHistory.add(id);
+		}
+	}
+
+	public boolean alreadyVotedFor(String id){
+		return voteHistory.contains(id);
 	}
 
 	public void addRelationship(String[] relationships, String[] reverseRelationships, String fromUserId, String toUserId, String relType){

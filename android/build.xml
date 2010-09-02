@@ -44,7 +44,7 @@ should be checked in in Version Control Systems.
     <pathelement path="${sdk.dir}/tools/lib/jarutils.jar" />
   </path>
 
-  <target name="jar">
+  <target name="jar" depends="compile">
     <jar destfile="./bin/PartyWare.jar" basedir="./bin/classes"/>
   </target>
 

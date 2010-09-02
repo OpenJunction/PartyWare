@@ -33,7 +33,6 @@ public class JunctionApp extends Application {
     private Handler mHandler = new Handler();
 	private int mConnectionStatus = 0;
 	private String mConnectionStatusText = "Disconnected";
-	private HashSet<String> voteHistory = new HashSet<String>();
     public static final String BROADCAST_STATUS = "edu.stanford.junction.sample.partyware.JunctionStatus";
 
 	public PartyProp getProp() {
@@ -64,21 +63,15 @@ public class JunctionApp extends Application {
 	}
 
 	public void upvoteVideo(String id){
-		if(!(voteHistory.contains(id))){
-			partyProp.upvoteVideo(id);
-			voteHistory.add(id);
-		}
+		partyProp.upvoteVideo(id);
 	}
 
 	public void downvoteVideo(String id){
-		if(!(voteHistory.contains(id))){
-			partyProp.downvoteVideo(id);
-			voteHistory.add(id);
-		}
+		partyProp.downvoteVideo(id);
 	}
 
 	public boolean alreadyVotedFor(String id){
-		return voteHistory.contains(id);
+		return partyProp.alreadyVotedFor(id);
 	}
 
 	public String getConnectionStatusText(){
