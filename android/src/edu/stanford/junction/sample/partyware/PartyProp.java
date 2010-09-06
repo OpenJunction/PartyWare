@@ -137,9 +137,16 @@ public class PartyProp extends Prop {
 			for(String id : path){
 				JSONObject rel = getRelationship(id, curId);
 				String relType = rel.optString("relType");
-				JSONObject user = getUser(id);
-				String name = user.optString("name");
 				String a = relType.matches("^[aeiou].+") ? "an" : "a";
+				String name = "NA";
+
+				// We may encounter an id that hasn't been associated
+				// with a user yet...
+				JSONObject user = getUser(id);
+				if(user != null){
+					name = user.optString("name");
+				}
+
 				if(curId.equals(selfId)){
 					pathStr = "You are " + a + " " + relType + " of " + name;
 				}

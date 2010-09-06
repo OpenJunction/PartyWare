@@ -17,61 +17,74 @@ import org.json.JSONObject
 import java.util.ArrayList
 import java.util.Random
 import java.util.Date
+import java.util.UUID
 import java.net._
 
 case class Wakeup()
 
 import Data._
+import Helpers._
 
 object Main {
 
-  val users: ListBuffer[User] = ListBuffer()
-
   def main(args: Array[String]) {
-    for (i <- 1 until 10) {
-      newUser(i)
-    }
+    val monitor = new SimMonitor()
+    monitor.start
   }
-
-  def newUser(i: Int) {
-    val u = new User(i)
-    u.start
-  }
-
 }
 
-class User(i: Int) extends Actor {
-
-  def doWithProb(actions: (Double, () => Unit)*) {
+class SimMonitor() extends Actor {
+  val users: ListBuffer[User] = ListBuffer()
+  def act() {
     val rng = new Random()
-    val roll = rng.nextDouble()
-    var cur = 0.0
-    breakable {
-      for (action <- actions) {
-        action match {
-          case (prob, todo) => {
-            if (roll >= cur && roll < (cur + prob)) {
-              todo()
-              break
-            } else {
-              cur += prob
-            }
+    ActorPing.scheduleAtFixedRate(this, Wakeup(), 100, 1000)
+    loop {
+      try {
+        react {
+          case Wakeup() => {
+            doWithProb((0.15, { () =>
+              val id = UUID.randomUUID.toString()
+              val u = new User(id)
+              users += u
+              u.start
+            }), (0.04, { () =>
+              val randUser = shuffle(users).headOption
+              for (u <- randUser) {
+                u ! 'kill
+		users.remove(u)
+              }
+            }))
+            println("------------")
+            println("Status: " + users.length + " users.")
+            println("------------")
           }
+          case msg => {
+            println("Unexpected msg: " + msg)
+          }
+        }
+      } catch {
+        case e: Exception => {
+          println("Error in msg loop, " + e)
         }
       }
     }
   }
+}
+
+class User(id: String) extends Actor {
 
   val prop = new PartyProp("party_prop")
   val jxActor = new JunctionActor("participant") {
     override def onActivityJoin() {
-      println("User " + i + " joined activity!")
+      println("--------------------------")
+      println("User " + id + " joined activity!")
+      println("--------------------------")
     }
     override def onActivityCreate() {
-      println("User " + i + " created activity!")
+      println("User " + id + " created activity!")
     }
     override def onMessageReceived(header: MessageHeader, msg: JSONObject) {
-      println("User " + i + " got message!")
+      println("User " + id + " got message!")
     }
 
     override def getInitialExtras(): java.util.List[JunctionExtra] = {
@@ -109,12 +122,12 @@ class User(i: Int) extends Actor {
     }
   }
 
-  val name = randomName + i
+  val name = randomName + id
   val thumb = randomPortrait
-  val id = "user" + i
 
   def act() {
     initJunction
+    prop.updateUser(id, name, "", thumb)
     val rng = new Random()
     ActorPing.scheduleAtFixedRate(this, Wakeup(), rng.nextInt(1000), 1000)
     loop {
@@ -134,15 +147,17 @@ class User(i: Int) extends Actor {
               val id = randomVideoInProp(prop).optString("id")
               prop.downvoteVideo(id)
             }), (0.03, { () =>
-              prop.updateUser(id, name, "", thumb)
-            }), (0.03, { () =>
-	      val toId = randomUserInProp(prop).optString("id")
+              val toId = randomUserInProp(prop).optString("id")
               prop.addRelationship(
-		relations.toArray, 
-		reverseRelations.toArray, 
-		id, toId, randomRelation)
+                relations.toArray,
+                reverseRelations.toArray,
+                id, toId, randomRelation)
             }))
           }
+          case 'kill => {
+	    jxActor.leave()
+	    exit
+	 }
           case msg => {
             println("Unexpected msg: " + msg)
           }

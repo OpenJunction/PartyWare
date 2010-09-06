@@ -94,7 +94,7 @@ object Data{
     "spouse"
   )
 
-  def randomRelation = shuffle(relations).head
+  def randomRelation = shuffle(relations.filterNot(_ == "none")).head
 
 
 }
