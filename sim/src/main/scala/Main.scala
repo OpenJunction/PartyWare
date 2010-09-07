@@ -136,17 +136,17 @@ class User(id: String) extends Actor {
           case Wakeup() => {
             doWithProb((0.05, { () =>
               prop.addImage(id, randomImage, randomImage, "...", (new Date()).getTime() / 1000)
-            }), (0.03, { () =>
+            }), (0.01, { () =>
               val vid = randomVideo
               val thumb = "http://img.youtube.com/vi/" + vid + "/default.jpg";
               prop.addYoutube(id, vid, thumb, "...", (new Date()).getTime() / 1000)
-            }), (0.03, { () =>
+            }), (0.01, { () =>
               val id = randomVideoInProp(prop).optString("id")
               prop.upvoteVideo(id)
-            }), (0.03, { () =>
+            }), (0.01, { () =>
               val id = randomVideoInProp(prop).optString("id")
               prop.downvoteVideo(id)
-            }), (0.03, { () =>
+            }), (0.01, { () =>
               val toId = randomUserInProp(prop).optString("id")
               prop.addRelationship(
                 relations.toArray,

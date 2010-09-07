@@ -58,7 +58,14 @@ public class ImgurUploadService extends Service {
     private static final int PROGRESS_UPDATE_INTERVAL_MS = 250;
     private static final int CHUNK_SIZE = 9000;
     private static final int READ_BUFFER_SIZE_BYTES = (3 * CHUNK_SIZE) / 4;
-    private static final String API_KEY = "4e219fc7820b0d6ab44f3237fe7ca04f";
+    private static final String[] API_KEYS = {
+		"4e219fc7820b0d6ab44f3237fe7ca04f", 
+		"f173a4acc64cc22e58a532d2105c26cf",
+		"3c4997adee6d929c4035701e852c8fc1",
+		"0815819b62b1e8c3b6f291330459117a",
+		"fa5438f68aa8827b6ba4bd134bd3be52"
+	};
+		
     private static final int THUMBNAIL_MAX_SIZE = 200;
 
     public static final String BROADCAST_FINISHED = "edu.stanford.junction.sample.partyware.ImageUploadedEvent";
@@ -251,7 +258,11 @@ public class ImgurUploadService extends Service {
             hout.println("Content-Disposition: form-data; name=\"key\"");
             hout.println("Content-Type: text/plain");
             hout.println();
-            hout.println(API_KEY);
+
+			Random rng = new Random();
+			String key = API_KEYS[rng.nextInt(API_KEYS.length)];
+            hout.println(key);
+
             hout.println(boundary);
             hout.println("Content-Disposition: form-data; name=\"image\"");
             hout.println("Content-Transfer-Encoding: base64");
