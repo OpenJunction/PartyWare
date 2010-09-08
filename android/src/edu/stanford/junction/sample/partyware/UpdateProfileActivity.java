@@ -1,6 +1,7 @@
 package edu.stanford.junction.sample.partyware;
 
 import edu.stanford.junction.sample.partyware.util.*;
+import edu.stanford.junction.sample.partyware.helpers.*;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -26,6 +27,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import java.io.*;
+import java.util.*;
 
 
 public class UpdateProfileActivity extends RichActivity{
@@ -77,7 +79,8 @@ public class UpdateProfileActivity extends RichActivity{
 		Button button = (Button)findViewById(R.id.use_camera_button);
 		button.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
-					takePicture();
+					Helpers.takeSmallPicture(UpdateProfileActivity.this, 
+										REQUEST_CODE_TAKE_PICTURE);
 				}
 			});
 
@@ -140,26 +143,6 @@ public class UpdateProfileActivity extends RichActivity{
 					}
 				}
 			});
-	}
-
-	protected void takePicture(){
-		Camera camera = Camera.open();
-		Camera.Parameters parameters = camera.getParameters();
-		parameters.setPictureFormat(PixelFormat.JPEG);
-		parameters.setPictureSize(800, 600);
-		camera.setParameters(parameters);
-		camera.release();
-
-		Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-		if (Misc.hasImageCaptureBug()) {
-			i.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, 
-					   Uri.fromFile(new File("/sdcard/tmp")));
-		} 
-		else {
-			i.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, 
-					   android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-		}
-		startActivityForResult(i, REQUEST_CODE_TAKE_PICTURE);
 	}
 
 	protected void pickFromLibrary(){

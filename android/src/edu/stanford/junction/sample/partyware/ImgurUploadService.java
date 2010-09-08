@@ -311,6 +311,7 @@ public class ImgurUploadService extends Service {
                 Log.d(this.getClass().getName(), "Upload complete...");
                 mProgressNotification.contentView.setProgressBar(
                     R.id.UploadProgress, totalFileLength, totalRead, false);
+				mNotificationManager.cancelAll();
             }
 
             hout.println(boundary);
@@ -416,4 +417,11 @@ public class ImgurUploadService extends Service {
         Log.i(this.getClass().getName(), "in onBind(Intent)");
         return null;
     }
+
+	@Override
+	public void onDestroy(){
+		super.onDestroy();
+		mNotificationManager.cancelAll();
+	}
+
 }

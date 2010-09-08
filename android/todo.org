@@ -10,8 +10,10 @@
 * wifi
 * distribute url in easier way
 
-* camera crash on non-droid
-* should be able to cancel 'uploading...'
-* deleting pictures
+
+
+* Bugs from demo
+** camera crash on non-droid -- maybe fixed? test on Monica and Alex's
+** deleting pictures
 
 
