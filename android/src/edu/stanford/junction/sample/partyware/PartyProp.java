@@ -73,11 +73,11 @@ public class PartyProp extends Prop {
 		addOperation(newAddObjOp(item));
 	}
 
-	protected void deleteObj(JSONObject item){
+	public void deleteObj(JSONObject item){
 		addOperation(newDeleteObjOp(item));
 	}
 
-	protected void deleteObj(String itemId){
+	public void deleteObj(String itemId){
 		addOperation(newDeleteObjOp(itemId));
 	}
 

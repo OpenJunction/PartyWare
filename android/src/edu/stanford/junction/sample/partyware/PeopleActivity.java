@@ -103,6 +103,17 @@ public class PeopleActivity extends RichListActivity implements OnItemClickListe
 		mPeople.recycle();
 	}
 
+	class DeleteListener implements OnClickListener{
+		public String id;
+		public DeleteListener(String id){
+			this.id = id;
+		}
+		public void onClick(View v) {
+			JunctionApp app = (JunctionApp)getApplication();
+			PartyProp prop = app.getProp();
+			prop.deleteObj(this.id);
+		}
+	}
 
 	class PeopleAdaptor extends MediaListAdapter<JSONObject> {
 
@@ -116,7 +127,7 @@ public class PeopleActivity extends RichListActivity implements OnItemClickListe
 			if (v == null) {
 				LayoutInflater vi = (LayoutInflater)(getContext().getSystemService(
 														 Context.LAYOUT_INFLATER_SERVICE));
-				v = vi.inflate(R.layout.picture_item, null);
+				v = vi.inflate(R.layout.profile_picture_item, null);
 			}
 			JSONObject o = getItem(position);
 			if (o != null) {
@@ -145,6 +156,17 @@ public class PeopleActivity extends RichListActivity implements OnItemClickListe
 				final ImageView icon = (ImageView)v.findViewById(R.id.icon);
 				final String url = o.optString("imageUrl");
 				loadImage(icon, url);
+
+				Button delete = (Button) v.findViewById(R.id.delete_button);
+				
+				if(!(app.getUserId().equals(id))){
+					delete.setVisibility(View.GONE);
+				}
+				else{
+					delete.setVisibility(View.VISIBLE);
+					delete.setOnClickListener(new DeleteListener(id));
+				}
+
 
 			}
 			return v;

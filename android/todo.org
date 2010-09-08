@@ -14,6 +14,6 @@
 
 * Bugs from demo
 ** camera crash on non-droid -- maybe fixed? test on Monica and Alex's
-** deleting pictures
+** cancel youtube searches and image uploads
 
 

@@ -57,7 +57,7 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 		button.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
 					Helpers.takeSmallPicture(PicturesActivity.this, 
-										REQUEST_CODE_TAKE_PICTURE);
+											 REQUEST_CODE_TAKE_PICTURE);
 				}
 			});
 
@@ -236,6 +236,19 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 	}
 
 
+	class DeleteListener implements OnClickListener{
+		public String id;
+		public DeleteListener(String id){
+			this.id = id;
+		}
+		public void onClick(View v) {
+			JunctionApp app = (JunctionApp)getApplication();
+			PartyProp prop = app.getProp();
+			prop.deleteObj(this.id);
+		}
+	}
+
+
 	class PicAdapter extends MediaListAdapter<JSONObject> {
 
 		public PicAdapter(Context context){
@@ -264,6 +277,23 @@ public class PicturesActivity extends RichListActivity implements OnItemClickLis
 				final ImageView icon = (ImageView)v.findViewById(R.id.icon);
 				final String url = o.optString("thumbUrl");
 				loadImage(icon, url);
+
+				String id = o.optString("id");
+				String owner = o.optString("owner");
+
+				Button delete = (Button) v.findViewById(R.id.delete_button);
+
+				JunctionApp app = (JunctionApp)getApplication();
+
+				
+				if(!(app.getUserId().equals(owner))){
+					delete.setVisibility(View.GONE);
+				}
+				else{
+					delete.setVisibility(View.VISIBLE);
+					delete.setOnClickListener(new DeleteListener(id));
+				}
+
 			}
 			return v;
 		}
