@@ -1,12 +1,17 @@
-* Imgur pro account
-
-* Populate update profile fields from contacts (and auto-complete)
-
+* Remove the upload notification
 * Add people to android contacts
-
 * Add owner names to content
-
 * Periodically (and on demand) save (state,state#,sessionId) snapshots to db
 
 * Add Load Recent Party button
+
+
+
+* wifi
+* distribute url in easier way
+
+* camera crash on non-droid
+* should be able to cancel 'uploading...'
+* deleting pictures
+
 

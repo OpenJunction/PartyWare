@@ -17,8 +17,8 @@
     <ImageView
 	android:id="@+id/image"
 	android:layout_width="fill_parent"
-	android:layout_height="150dip"
-	android:layout_margin="10dip"
+	android:layout_height="100dip"
+	android:layout_margin="5dip"
 	android:layout_weight="0.5"
 	android:scaleType="fitCenter"
 	/>
@@ -98,7 +98,7 @@
     <Button
 	android:id="@+id/finished_button"
 	android:layout_width="100dip"
-	android:layout_height="50dip"
+	android:layout_height="wrap_content"
 	android:text="Done"
 	/>
   </LinearLayout>

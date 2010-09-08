@@ -11,9 +11,11 @@ import android.app.ProgressDialog;
 import android.graphics.PixelFormat;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
+import android.view.inputmethod.InputMethodManager;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
+import android.view.KeyEvent;
 import android.view.View.OnClickListener;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -100,6 +102,33 @@ public class UpdateProfileActivity extends RichActivity{
 				}
 			});
 	}
+
+
+	// XXX. Fix for Android bug where 'next' button doesn't pass 
+	// focus down when an AutoCompleteTextView is focued.
+	@Override
+	public boolean onKeyUp (int keyCode, KeyEvent event) {
+		View ac1 = mNameText;
+		View ac2 = mEmailText;
+        if (keyCode == KeyEvent.KEYCODE_ENTER) {
+			if (ac1.hasFocus()) {
+				//sends focus to ac2 (user pressed "Next")
+				ac2.requestFocus();
+				return true;
+			}
+			else if (ac2.hasFocus()) {
+				//closes soft keyboard (user pressed "Done")
+				InputMethodManager inputManager = (InputMethodManager)
+					getSystemService(Context.INPUT_METHOD_SERVICE);
+				inputManager.hideSoftInputFromWindow(
+					ac2.getWindowToken(), 
+					InputMethodManager.HIDE_NOT_ALWAYS);
+				return true;
+			}
+        }
+        return false;
+
+	} 
 
 	protected void showPortrait(Uri uri){
 		mgr.getBitmap(uri.toString(), new Handler(){
