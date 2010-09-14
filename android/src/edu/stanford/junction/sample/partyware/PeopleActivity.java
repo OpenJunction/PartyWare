@@ -150,7 +150,7 @@ public class PeopleActivity extends RichListActivity implements OnItemClickListe
 					}
 				}
 				else{
-					bt.setText("No connection.");
+					bt.setText("No relationship.");
 				}
 
 				final ImageView icon = (ImageView)v.findViewById(R.id.icon);

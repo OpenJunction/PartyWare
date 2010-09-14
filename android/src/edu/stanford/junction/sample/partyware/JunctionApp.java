@@ -26,8 +26,8 @@ public class JunctionApp extends Application {
     private PartyProp partyProp;
     private Thread connectionThread;
     private String mUserId;
-    private String mUserName = "";
-    private String mUserEmail = "";
+    private String mUserName = "Anonymous";
+    private String mUserEmail = "...";
     private String mUserImageUrl = "http://www.independent.co.uk/multimedia/archive/00390/Self_Portrait__c_19_390601t.jpg";
 
     private Handler mHandler = new Handler();
@@ -55,6 +55,14 @@ public class JunctionApp extends Application {
 		mUserName = name;
 		mUserEmail = email;
 		mUserImageUrl = imageUrl;
+
+		SharedPreferences mPrefs = getSharedPreferences("prefs", MODE_PRIVATE);
+		SharedPreferences.Editor ed = mPrefs.edit();
+		ed.putString("user_name", mUserName);
+		ed.putString("user_email", mUserEmail);
+		ed.putString("user_image", mUserImageUrl);
+		ed.commit();
+
 		partyProp.updateUser(mUserId, name, email, imageUrl);
 	}
 
@@ -113,11 +121,25 @@ public class JunctionApp extends Application {
 	public void onCreate() {
 		super.onCreate();
 		partyProp = new PartyProp("party_prop");
-
 		mUserId = buildUserId();
 
-		// Maybe auto-connect
+
 		SharedPreferences mPrefs = getSharedPreferences("prefs", MODE_PRIVATE);
+
+		String userName = mPrefs.getString("user_name", null);
+		if(userName != null){
+			mUserName = userName;
+		}
+		String userEmail = mPrefs.getString("user_email", null);
+		if(userEmail != null){
+			mUserEmail = userEmail;
+		}
+		String userImage = mPrefs.getString("user_image", null);
+		if(userImage != null){
+			mUserImageUrl = userImage;
+		}
+
+		// Maybe auto-connect
 		String url = mPrefs.getString("last_party_url", null);
 		if(url != null){
 			updateStatus(1, "Reconnecting to previous part...");

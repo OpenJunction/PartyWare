@@ -14,6 +14,7 @@ import java.io.OutputStream;
  * most 76 characters.
  */
 public class Base64OutputStream extends FilterOutputStream {
+
 	public Base64OutputStream(OutputStream out) {
 		super(out);
 	}
