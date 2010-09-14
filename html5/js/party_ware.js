@@ -13,11 +13,14 @@ var PartyWare =
 															self.modelChanged();
 														}});
 
-						 this.model.addTopVideoChangedListener(
-							 function(vid){
-								 loadNewVideo(vid.videoId, 0);
-							 });
-
+						 this.model.addChangeListener({ type: "sync",
+														onChange: function(o){
+															// Kick off the playlist
+															var nextVid = self.model.topVotedVideo();
+															if(nextVid){
+																loadNewVideo(nextVid.videoId, 0);
+															}
+														}});
 
 						 $("#nameInputButton").click(
 							 function(){
@@ -39,6 +42,11 @@ var PartyWare =
 									 null, self.userId, videoId,
 									 "http://blogs.wyomingnews.com/blogs/backstagepass/files/2009/09/youtube_logo.jpg", 
 									 "..from web..");
+							 });
+
+						 $("#nextVideoButton").click(
+							 function(){
+								 gotoNextVideo();
 							 });
 					 },
 
@@ -106,7 +114,6 @@ var PartyWare =
 						 // Update the party name
 
 						 $('#mainTitle').text("In Party: " + self.model.getName());
-
 
 					 },
 

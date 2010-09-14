@@ -26,8 +26,8 @@ public class JunctionApp extends Application {
     private PartyProp partyProp;
     private Thread connectionThread;
     private String mUserId;
-    private String mUserName = "Anonymous";
-    private String mUserEmail = "...";
+    private String mUserName = "";
+    private String mUserEmail = "";
     private String mUserImageUrl = "http://www.independent.co.uk/multimedia/archive/00390/Self_Portrait__c_19_390601t.jpg";
 
     private Handler mHandler = new Handler();
