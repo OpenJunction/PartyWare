@@ -105,6 +105,9 @@ var PartyProp = JunctionProps.Prop.extend(
 		getPictures: function(){
 			return this.state.getPictures();
 		},
+		getUsers: function(){
+			return this.state.getUsers();
+		},
 		getPlaylist: function(){
 			return this.state.getPlaylist();
 		},
@@ -153,26 +156,30 @@ var PartyProp = JunctionProps.Prop.extend(
 
 				getName: function(){ return this.raw.name; },
 
-				getPictures: function(){
-					var pics = [];
+				objectsOfType: function(tpe){
+					var objs = [];
 					for(var id in this.raw.objects){
 						var obj = this.raw.objects[id];
-						if(obj.type == "image"){
-							pics.push(obj);
+						if(obj.type == tpe){
+							objs.push(obj);
 						}
 					}
+					return objs;
+				},
+
+				getPictures: function(){
+					var pics = this.objectsOfType("image");
 					pics.sort(function(a,b){ return b.time - a.time; });
 					return pics;
 				},
 
+				getUsers: function(){
+					var users = this.objectsOfType("user");
+					return users;
+				},
+
 				getPlaylist: function(){
-					var vids = [];
-					for(var id in this.raw.objects){
-						var obj = this.raw.objects[id];
-						if(obj.type == "youtube"){
-							vids.push(obj);
-						}
-					}
+					var vids = this.objectsOfType("youtube");
 					vids.sort(function(a,b){ 
 								  if(a.votes == b.votes) return (a.time - b.time);
 								  else return b.votes - a.votes;

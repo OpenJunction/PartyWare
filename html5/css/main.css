@@ -83,6 +83,15 @@ h1,h2,h3,p,a{
     cursor: pointer;
 }
 
+#people td {
+    width: 100%;
+    border: none;
+}
+
+#layoutTable #peopleCell {
+    border: none;
+}
+
 
 
 

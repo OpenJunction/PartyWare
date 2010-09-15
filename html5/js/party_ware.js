@@ -48,11 +48,26 @@ var PartyWare =
 						 var self = this;
 						 var i,div;
 
-						 // Update the pictures list 
+						 // Update the people list 
+						 $("#people").children().remove();
+						 var people = this.model.getUsers();
+						 var table = this.buildTable(
+							 people, 8, 
+							 function(ea,cell){
+								 div = $("<div/>");
+								 var img = $('<img/>').attr({src: ea.imageUrl});
+								 $(div).append(img);
+								 $(div).append($('<p/>').text(ea.name));
+								 $(cell).append(div);
+							 });
+						 $("#people").append(table);
 
+
+
+						 // Update the pictures list 
 						 $("#pictures").children().remove();
 						 var pics = this.model.getPictures();
-						 var table = this.buildTable(
+						 table = this.buildTable(
 							 pics, 5, 
 							 function(ea,cell){
 								 div = $("<div/>");
@@ -72,8 +87,9 @@ var PartyWare =
 							 });
 						 $("#pictures").append(table);
 
-						 // Update the youtube list
 
+
+						 // Update the youtube list
 						 $("#playlist").children().remove();
 						 var vids = this.model.getPlaylist();
 						 $.each(vids,function(i,ea){
