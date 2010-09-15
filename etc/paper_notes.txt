@@ -1,0 +1,35 @@
+Here, Now Transient - different requirements 
+ * Desired interactions are shaped by the context
+ * Don't necessarily want to use global identity
+ * Identity is transient and Anonymous
+    - short term commitment
+    - no prior affiliation required
+
+
+Digital Persona
+ * Activities customized for the party context
+ * Collaborate by sharing digital media with others. Motivated by selfish desire to show-off digital persona.
+ * Collaborations are real-time, local, therefore interesting (voting, pictures)
+ * Collaborative filtering. 
+ * Collaborative documenting of the party. Take pictures, give them captions.
+
+
+Journaling
+ * Augmented memory
+   * list of attendees
+   * post-mortem content discovery
+   * content associated with peopl - mneumonic for how was there
+ * Also serves to discover new media - approved by your friends.
+
+--------------------------
+
+
+Compare to the centralized case.
+
+
+Bring an app to the party.
+
+
+
+in situ, easier, anonymous, ephemeral -- 
+play music (data mining of music)

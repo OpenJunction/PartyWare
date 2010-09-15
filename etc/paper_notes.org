@@ -1,0 +1,83 @@
+* Themes 
+** Inclusive
+*** 'frictionless'
+*** No network affiliation required - no need to sign up to the "web site" that runs the party
+*** Easy access - QR or Lobby
+*** Apps are assets brought to party? How to enable this for partyware...
+*** short term commitment
+* Seat of Identity is your Phone
+** Freedom of _not_ using a global identity
+** Share as little or as much as you'd like
+** In situ - same UI playing by myself and in a party
+** Regular digital belongings - i do not want to join yet another web site to upload my sorry self. 
+** belongings are not silo'ed
+
+* Collaborative "partying" (in situ, context)
+** learning who's at the party, limited networking. Phone # discovery 
+** collaborative album / collaborative playlist
+*** real-time activities that support the party context
+** content 
+
+* Journaling
+** Augmented memory
+*** ties artifacts to place and time
+*** list of attendees
+*** post-mortem content discovery
+*** content associated with peopl - mneumonic for how was there
+
+
+* Related work
+** Friendlee http://mobilehci.uni-siegen.de/proceedings2009/sp275-ankolekar.pdf
+*** Mines your contact list. Browse friends of friends, sorted by strength of 
+    edge. 'Category' system for controlling privacy.
+
+
+** Time to meet face-to-face and device-to-device
+*** http://portal.acm.org/citation.cfm?id=1152215.1152231&coll=ACM&dl=ACM&CFID=4679284&CFTOKEN=13749898
+
+*** "Brief meetings give little opportunity for interacting with systems. 
+    But the participants are more prone to provide personal information 
+    since the risk of loosing their anonymity is less acute"
+
+
+** Jukola: democratic music choice in a public space
+*** http://portal.acm.org/citation.cfm?id=1013115.1013136
+*** "The paper presents a field trial of the system in a local cafe bar. 
+    As well as the value in affording a democratic musical outcome, 
+    more importantly the whole process of voting and choice created a 
+    rich source of social value and interaction in the form of discussions 
+    around music, playful competition, identity management and 
+     sense of community"
+
+
+** Social playlist: enabling touch points and enriching ongoing relationships through collaborative mobile music listening
+*** http://portal.acm.org/citation.cfm?id=1409240.1409299&coll=GUIDE&dl=GUIDE&CFID=://mobilehci2008.telin.nl/&CFTOKEN=mobilehci2008.telin.nl/
+
+
+** Sharing places: testing psychological effects of location cueing frequency and explicit vs. inferred closeness 
+*** http://portal.acm.org/citation.cfm?id=1409240.1409298&coll=GUIDE&dl=GUIDE&CFID=://mobilehci2008.telin.nl/&CFTOKEN=mobilehci2008.telin.nl/
+*** heightened awareness if users are known to be nearby
+
+** Graphical representation of meetings on mobile devices
+*** http://portal.acm.org/citation.cfm?id=1409240.1409330&coll=GUIDE&dl=GUIDE&CFID=://mobilehci2008.telin.nl/&CFTOKEN=mobilehci2008.telin.nl/
+
+
+** Close Encounters: Supporting Mobile Collaboration through Interchange of User Profiles
+*** http://portal.acm.org/citation.cfm?id=743876&dl=ACM&coll=ACM&CFID=4679284&CFTOKEN=13749898
+
+
+** Searching common experience: a social communication tool based on mobile ad-hoc networking
+*** http://portal.acm.org/citation.cfm?id=1085777.1085781&coll=GUIDE&dl=GUIDE&CFID=://www.google.com/search?q=mobilehci+2005+proceedings+acm&CFTOKEN=www.google.com/search?q=mobilehci+2005+proceedings+acm
+
+
+** Telelogs: a social communication space for urban environments
+*** http://portal.acm.org/citation.cfm?id=1085777.1085817&coll=GUIDE&dl=GUIDE&CFID=://www.google.com/search?q=mobilehci+2005+proceedings+acm&CFTOKEN=www.google.com/search?q=mobilehci+2005+proceedings+acm
+
+
+** The familiar stranger: anxiety, comfort, and play in public places
+*** http://portal.acm.org/citation.cfm?id=985721&dl=GUIDE&coll=GUIDE&CFID=102791806&CFTOKEN=36205506
+
+
+
+
+

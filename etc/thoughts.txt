@@ -1,0 +1,42 @@
+
+
+Was thinking about the theme you mentioned - 
+'bringing your identity to the party'.
+
+Things that make our approach unique.
+
+
+QR Code - A secure way to bind the party to a particular place and time. A 'happening'. Keeps everyone out who is not here, right now.
+
+You choose what identity you want to expose. You can carry over identity from an existing provider, or you can create a fresh identity for this party. Important because 
+A) not everyone has an external provider (is on facebook)
+B) you might not want your facebook identity at this party.
+    * facebook profile might be too personal (privacy concerns)
+    * facebook profile misses information that is vital for this place and time. Example: at a conference, you might want a list of publications.
+
+
+Augmented physical social networking. The people are here. What can we do in a nonobtrusive way to facilitate networking.
+ * Everyone sees the participants. Can view their party profiles.
+ * (pending) Add them to your address-book with a touch 
+ * (pending) You can specify your relationship with a persion (colleague, spouse, professor) etc. 
+    The system then displays the number of networking 'hops' it takes to get from one of your friends to someone you want to meet.
+
+
+Digital Persona
+ * Collaborate by sharing digital media with others. Motivated by selfish desire to show-off digital persona.
+ * The playlist is here and now. The voting determines which song plays, and what people hear at *this* party. Real-time collaboration instead of passive sharing. Collaborative filtering. 
+ * Collaborative documenting of the party. Take pictures, give them captions.
+
+
+Life Journaling
+ * Party is a 'happening', A demarcated event. Application captures this.
+ * Browse old parties to discover missed connections.
+ * The annotated objects (pictures and video) serve as a mneumonic for who was there and what happened.
+ * Also serves to discover new media - approved by your friends.
+
+
+
+
+
+
+
