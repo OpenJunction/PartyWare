@@ -8,6 +8,9 @@ import edu.stanford.junction.extra.JSONObjWrapper;
 
 public class PartyProp extends Prop {
 
+	// A client-only helper to prevent multiple votes for the same vid
+	private HashSet<String> voteHistory = new HashSet<String>();
+
 	public PartyProp(String propName, String propReplicaName, IPropState s){
 		super(propName, propReplicaName, s);
 	}
@@ -61,15 +64,6 @@ public class PartyProp extends Prop {
 			obj.put("type", "vote");
 			obj.put("itemId", itemId);
 			obj.put("count", count);
-		}
-		catch(JSONException e){}
-		return obj;
-	}
-
-	protected JSONObject newClearVotesOp(){
-		JSONObject obj = new JSONObject();
-		try{
-			obj.put("type", "clearVotes");
 		}
 		catch(JSONException e){}
 		return obj;
@@ -198,29 +192,21 @@ public class PartyProp extends Prop {
 	}
 
 	public void upvoteVideo(String id){
+		if(!(voteHistory.contains(id))){
 			addOperation(newVoteOp(id, 1));
-			rememberVote(id);
+			voteHistory.add(id);
+		}
 	}
 
 	public void downvoteVideo(String id){
+		if(!(voteHistory.contains(id))){
 			addOperation(newVoteOp(id, -1));
-			rememberVote(id);
+			voteHistory.add(id);
+		}
 	}
 
-	public void rememberVote(final String id){
-		withState(new IWithStateAction<Boolean>(){
-				public Boolean run(IPropState state){
-					return ((PartyState)state).rememberVote(id);
-				}
-			});
-	}
-
-	public boolean alreadyVotedFor(final String id){
-		return withState(new IWithStateAction<Boolean>(){
-				public Boolean run(IPropState state){
-					return ((PartyState)state).alreadyVotedFor(id);
-				}
-			});
+	public boolean alreadyVotedFor(String id){
+		return voteHistory.contains(id);
 	}
 
 	public void addRelationship(String[] relationships, String[] reverseRelationships, String fromUserId, String toUserId, String relType){
@@ -310,10 +296,6 @@ public class PartyProp extends Prop {
 
 	static class PartyState implements IPropState {
 
-		// A client-only helper to prevent multiple votes for the same vid
-		// No critical that this is synced.
-		private HashSet<String> voteHistory = new HashSet<String>();
-
 		private HashMap<String, JSONObject> objects = new HashMap<String, JSONObject>();
 		private String name = "Unnamed Party";
 		private int hashCode = 0;
@@ -321,9 +303,10 @@ public class PartyProp extends Prop {
 		public PartyState(PartyState other){
 			if(other != null){
 				this.name = other.getName();
-				Iterator<Map.Entry<String,JSONObject>> it = other.objects.entrySet().iterator();
+				Iterator it = other.objects.entrySet().iterator();
 				while (it.hasNext()) {
-					Map.Entry<String,JSONObject> pair = it.next();
+					Map.Entry<String,JSONObject> pair = 
+						(Map.Entry<String,JSONObject>)it.next();
 					if(pair.getValue() instanceof JSONObjWrapper){
 						JSONObjWrapper obj = (JSONObjWrapper)pair.getValue();
 						objects.put(pair.getKey(), (JSONObject)obj.clone());
@@ -376,9 +359,6 @@ public class PartyProp extends Prop {
 				String name = op.optString("name");
 				this.name = name;
 			}
-			else if(type.equals("clearVotes")){
-				clearVotes();
-			}
 			else if(type.equals("vote")){
 				String id = op.optString("itemId");
 				int count = op.optInt("count");
@@ -428,9 +408,10 @@ public class PartyProp extends Prop {
 				e.printStackTrace(System.err);
 				throw new IllegalStateException("toJson failed in PartyProp!");
 			}
-			Iterator<Map.Entry<String,JSONObject>> it = objects.entrySet().iterator();
+			Iterator it = objects.entrySet().iterator();
 			while (it.hasNext()) {
-				Map.Entry<String,JSONObject> pair = it.next();
+				Map.Entry<String,JSONObject> pair = 
+					(Map.Entry<String,JSONObject>)it.next();
 				try{
 					JSONObjWrapper wrapper = (JSONObjWrapper)pair.getValue();
 					jsonObjects.put(String.valueOf(pair.getKey()), 
@@ -446,15 +427,6 @@ public class PartyProp extends Prop {
 
 		public JSONObject getUser(String id){
 			return objects.get(id);
-		}
-
-		public boolean alreadyVotedFor(final String id){
-			return voteHistory.contains(id);
-		}
-
-		public boolean rememberVote(final String id){
-			voteHistory.add(id);
-			return true;
 		}
 
 		public List<JSONObject> getImages(){
@@ -627,20 +599,6 @@ public class PartyProp extends Prop {
 				result.put(destination, path);
 			}
 			return result;
-		}
-
-		protected void clearVotes(){
-			Iterator<JSONObject> it = objects.values().iterator();
-			while (it.hasNext()) {
-				JSONObject ea = it.next();
-				String type = ea.optString("type");
-				if(type.equals("youtube")){
-					try{
-						ea.put("votes", 0);
-					} catch(JSONException e){}
-				}
-			}
-			voteHistory.clear();
 		}
 
 		public List<JSONObject> getUsers(){

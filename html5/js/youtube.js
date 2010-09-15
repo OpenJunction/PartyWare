@@ -29,11 +29,7 @@ function onytplayerStateChange(newState) {
 }
 
 function gotoNextVideo(){
-	var nextVid = PartyWare.partyProp.topVotedVideo();
-	if(nextVid){
-		loadNewVideo(nextVid.videoId, 0);
-	}
-	PartyWare.partyProp.clearVotes();
+	PartyWare.partyProp.recycleTopVideo();
 }
 
 // functions for the api calls

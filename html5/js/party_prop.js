@@ -5,14 +5,45 @@ var PartyProp = JunctionProps.Prop.extend(
 			this._super(propName, new this.PartyPropState(null),
 						propName + "_" + randomUUID());
 
-			this.addChangeListener({ type: "*",
+			this.topVideoChangedListeners = [];
+			this.currentTopVideo = null;
+
+			this.addChangeListener({ type: "change",
 									 onChange: function(o){
 										 self.updateOnChange();
 									 }});
-
+			this.addChangeListener({ type: "sync",
+									 onChange: function(o){
+										 self.updateOnChange();
+									 }});
 		},
 		
-		updateOnChange: function(){},
+		/** 
+		 * Notify app of playlist change.
+		 */
+		updateOnChange: function(){
+			var pl = this.getPlaylist();
+			if(pl.length > 0){
+				var top = pl[0];
+				if(this.currentTopVideo == null || top.id != this.currentTopVideo.id){
+					this.currentTopVideo = top;
+					for(var i = 0; i < this.topVideoChangedListeners.length; i++){
+						(this.topVideoChangedListeners[i])(this.currentTopVideo);
+					}
+				}
+			}
+			else {
+				this.currentTopVideo = null;
+			}
+		},
+
+		/** 
+		 * Register a listener for this app-level event.
+		 */
+		addTopVideoChangedListener: function(func){
+			this.topVideoChangedListeners.push(func);
+		},
+
 
 		reifyState: function(jsonObj){
 			return new this.PartyPropState(jsonObj);
@@ -47,19 +78,11 @@ var PartyProp = JunctionProps.Prop.extend(
 				});
 		},
 
-		topVotedVideo: function(){ 
-			var vids = this.getPlaylist();
-			if(vids.length > 0){
-				// Already sorted by votes..
-				return vids[0];
+		recycleTopVideo: function(){ 
+			if(this.currentTopVideo != null){
+				var v = this.currentTopVideo;
+				this.addYoutube(v.id, v.owner, v.videoId, v.thumbUrl, v.caption);
 			}
-			else {
-				return null;				
-			}
-		},
-
-		clearVotes: function(){ 
-			this.addOperation({type:"clearVotes"});
 		},
 
 		addYoutube: function(id, userId,videoId,thumbUrl,caption){
@@ -110,13 +133,6 @@ var PartyProp = JunctionProps.Prop.extend(
 					}
 					else if(op.type == "setName"){
 						this.raw.name = op.name;
-					}
-					else if(op.type == "clearVotes"){
-						this.eachObject(function(ea){
-											if(ea.type == "youtube"){
-												ea.votes = 0;
-											}
-										});
 					}
 					else if(op.type == "vote"){
 						var count = op.count;
