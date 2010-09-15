@@ -62,8 +62,9 @@ var PartyProp = JunctionProps.Prop.extend(
 		},
 
 		resetVideoVotes: function(id){ 
-			var vid = this.state.objectById(id);
+			var v = this.state.videoByYoutubeId(id);
 			if(v){
+				// reset vote count by overwriting video.
 				this.addYoutube(v.id, v.owner, v.videoId, v.thumbUrl, v.caption);
 			}
 		},
@@ -166,6 +167,20 @@ var PartyProp = JunctionProps.Prop.extend(
 				getUsers: function(){
 					var users = this.objectsOfType("user");
 					return users;
+				},
+
+				objectById: function(id){
+					return this.raw.objects[id];
+				},
+
+				videoByYoutubeId: function(videoId){
+					for(var id in this.raw.objects){
+						var obj = this.raw.objects[id];
+						if(obj.type == "youtube" && obj.videoId == videoId){
+							return obj;
+						}
+					}
+					return null;
 				},
 
 				getPlaylist: function(){

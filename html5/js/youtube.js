@@ -8,7 +8,6 @@ function onYouTubePlayerReady(playerId) {
 }
 
 function onPlayerError(errorCode) {
-    gotoNextVideo();
 }
 
 function onytplayerStateChange(newState) {
