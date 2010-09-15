@@ -8,9 +8,6 @@ import edu.stanford.junction.extra.JSONObjWrapper;
 
 public class PartyProp extends Prop {
 
-	// A client-only helper to prevent multiple votes for the same vid
-	private HashSet<String> voteHistory = new HashSet<String>();
-
 	public PartyProp(String propName, String propReplicaName, IPropState s){
 		super(propName, propReplicaName, s);
 	}
@@ -64,6 +61,15 @@ public class PartyProp extends Prop {
 			obj.put("type", "vote");
 			obj.put("itemId", itemId);
 			obj.put("count", count);
+		}
+		catch(JSONException e){}
+		return obj;
+	}
+
+	protected JSONObject newResetVoteHistoryOp(){
+		JSONObject obj = new JSONObject();
+		try{
+			obj.put("type", "resetVoteHistory");
 		}
 		catch(JSONException e){}
 		return obj;
@@ -192,21 +198,29 @@ public class PartyProp extends Prop {
 	}
 
 	public void upvoteVideo(String id){
-		if(!(voteHistory.contains(id))){
-			addOperation(newVoteOp(id, 1));
-			voteHistory.add(id);
-		}
+		addOperation(newVoteOp(id, 1));
+		rememberVote(id);
 	}
 
 	public void downvoteVideo(String id){
-		if(!(voteHistory.contains(id))){
-			addOperation(newVoteOp(id, -1));
-			voteHistory.add(id);
-		}
+		addOperation(newVoteOp(id, -1));
+		rememberVote(id);
 	}
 
-	public boolean alreadyVotedFor(String id){
-		return voteHistory.contains(id);
+	public boolean rememberVote(final String id){
+		return withState(new IWithStateAction<Boolean>(){
+				public Boolean run(IPropState state){
+					return ((PartyState)state).rememberVote(id);
+				}
+			});
+	}
+
+	public boolean alreadyVotedFor(final String id){
+		return withState(new IWithStateAction<Boolean>(){
+				public Boolean run(IPropState state){
+					return ((PartyState)state).alreadyVotedFor(id);
+				}
+			});
 	}
 
 	public void addRelationship(String[] relationships, String[] reverseRelationships, String fromUserId, String toUserId, String relType){
@@ -296,6 +310,9 @@ public class PartyProp extends Prop {
 
 	static class PartyState implements IPropState {
 
+		// A client-only helper to prevent multiple votes for the same vid
+		private HashSet<String> voteHistory = new HashSet<String>();
+
 		private HashMap<String, JSONObject> objects = new HashMap<String, JSONObject>();
 		private String name = "Unnamed Party";
 		private int hashCode = 0;
@@ -343,6 +360,8 @@ public class PartyProp extends Prop {
 		public String getName(){
 			return this.name;
 		}
+
+
 		
 		public IPropState applyOperation(JSONObject op){
 			String type = op.optString("type");
@@ -358,6 +377,9 @@ public class PartyProp extends Prop {
 			else if(type.equals("setName")){
 				String name = op.optString("name");
 				this.name = name;
+			}
+			else if(type.equals("resetVoteHistory")){
+				this.voteHistory.clear();
 			}
 			else if(type.equals("vote")){
 				String id = op.optString("itemId");
@@ -630,6 +652,13 @@ public class PartyProp extends Prop {
 			return objs;
 		}
 
+		public boolean alreadyVotedFor(final String id){
+			return voteHistory.contains(id);
+		}
+
+		public boolean rememberVote(final String id){
+			return voteHistory.add(id);
+		}
 
 		private void sortByTime(List<JSONObject> input, final boolean newToOld){
 			Collections.sort(input, new Comparator<JSONObject>(){

@@ -198,6 +198,7 @@ public class JunctionApp extends Application {
 							public void onActivityJoin() {
 								Log.i("JunctionApp", "Joined activity!");
 								updateStatus(2, "Joined Party");
+								JunctionApp.this.updateUser();
 							}
 							public void onActivityCreate(){
 								Log.i("JunctionApp", "You created the activity.");

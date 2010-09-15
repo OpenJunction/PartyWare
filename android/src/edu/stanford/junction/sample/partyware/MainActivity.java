@@ -59,7 +59,7 @@ public class MainActivity extends TabActivity{
 		mSyncListener = new IPropChangeListener(){
 				public String getType(){ return Prop.EVT_SYNC; }
 				public void onChange(Object data){
-					refreshHandler.sendEmptyMessage(0);		
+					refreshHandler.sendEmptyMessage(0);
 				}
 			};
 		prop.addChangeListener(mSyncListener);

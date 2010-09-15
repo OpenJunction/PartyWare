@@ -5,9 +5,6 @@ var PartyProp = JunctionProps.Prop.extend(
 			this._super(propName, new this.PartyPropState(null),
 						propName + "_" + randomUUID());
 
-			this.topVideoChangedListeners = [];
-			this.currentTopVideo = null;
-
 			this.addChangeListener({ type: "change",
 									 onChange: function(o){
 										 self.updateOnChange();
@@ -22,26 +19,12 @@ var PartyProp = JunctionProps.Prop.extend(
 		 * Notify app of playlist change.
 		 */
 		updateOnChange: function(){
-			var pl = this.getPlaylist();
-			if(pl.length > 0){
-				var top = pl[0];
-				if(this.currentTopVideo == null || top.id != this.currentTopVideo.id){
-					this.currentTopVideo = top;
-					for(var i = 0; i < this.topVideoChangedListeners.length; i++){
-						(this.topVideoChangedListeners[i])(this.currentTopVideo);
-					}
-				}
-			}
-			else {
-				this.currentTopVideo = null;
-			}
 		},
 
 		/** 
 		 * Register a listener for this app-level event.
 		 */
 		addTopVideoChangedListener: function(func){
-			this.topVideoChangedListeners.push(func);
 		},
 
 
@@ -78,11 +61,15 @@ var PartyProp = JunctionProps.Prop.extend(
 				});
 		},
 
-		recycleTopVideo: function(){ 
-			if(this.currentTopVideo != null){
-				var v = this.currentTopVideo;
+		resetVideoVotes: function(id){ 
+			var vid = this.state.objectById(id);
+			if(v){
 				this.addYoutube(v.id, v.owner, v.videoId, v.thumbUrl, v.caption);
 			}
+		},
+
+		resetVoteHistory: function(){ 
+			this.addOperation({type:"resetVoteHistory"});
 		},
 
 		addYoutube: function(id, userId,videoId,thumbUrl,caption){
@@ -136,6 +123,9 @@ var PartyProp = JunctionProps.Prop.extend(
 					}
 					else if(op.type == "setName"){
 						this.raw.name = op.name;
+					}
+					else if(op.type == "resetVoteHistory"){
+						// no-op on js version
 					}
 					else if(op.type == "vote"){
 						var count = op.count;

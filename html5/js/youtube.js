@@ -1,4 +1,5 @@
 var ytplayer = null;
+var nowPlayingId = null;
 
 function onYouTubePlayerReady(playerId) {
     ytplayer = document.getElementById("myytplayer");
@@ -29,13 +30,21 @@ function onytplayerStateChange(newState) {
 }
 
 function gotoNextVideo(){
-	PartyWare.partyProp.recycleTopVideo();
+	if(nowPlayingId){
+		PartyWare.partyProp.resetVideoVotes(nowPlayingId);
+	}
+	var vids = PartyWare.partyProp.getPlaylist();
+	if(vids.length > 0){
+		loadNewVideo(vids[0].videoId, 0);
+	}
+	PartyWare.partyProp.resetVoteHistory();
 }
 
-// functions for the api calls
 
+// functions for the api calls
 function loadNewVideo(id, startSeconds) {
     if (ytplayer) {
+		nowPlayingId = id;
         ytplayer.loadVideoById(id, parseInt(startSeconds));
     }
 }
