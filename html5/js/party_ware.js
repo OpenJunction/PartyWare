@@ -163,7 +163,7 @@ var PartyWare =
 					 ad: "edu.stanford.junction.partyware",
 					 friendlyName: "PartyWare",
 					 roles: { "buddy": {"platforms" : { /* platform definitions */ }}},
-					 sessionID: "partyware"
+					 sessionID: "partyware_session"
 				 };
 
 				 var jx = JX.newJunction(ascript, actor);

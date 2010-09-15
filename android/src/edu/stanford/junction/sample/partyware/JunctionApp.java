@@ -32,7 +32,7 @@ public class JunctionApp extends Application {
 
     private Handler mHandler = new Handler();
 	private int mConnectionStatus = 0;
-	private String mConnectionStatusText = "Disconnected";
+	private String mConnectionStatusText = "Not in a party.";
     public static final String BROADCAST_STATUS = "edu.stanford.junction.sample.partyware.JunctionStatus";
 
 	public PartyProp getProp() {
@@ -142,7 +142,7 @@ public class JunctionApp extends Application {
 		// Maybe auto-connect
 		String url = mPrefs.getString("last_party_url", null);
 		if(url != null){
-			updateStatus(1, "Reconnecting to previous part...");
+			updateStatus(1, "Joining previous party...");
 			connectToSession(Uri.parse(url));				
 		}
 	}
@@ -173,7 +173,7 @@ public class JunctionApp extends Application {
 
 	protected void initJunction(final Uri uri){
 
-		updateStatus(1, "Connecting...");
+		updateStatus(1, "Joining party...");
 
 		if(connectionThread != null){
 			connectionThread.interrupt();
@@ -233,7 +233,7 @@ public class JunctionApp extends Application {
 						AndroidJunctionMaker.getInstance(sb).newJunction(url, actor);
 						if(!isInterrupted()){
 							JunctionApp.this.jxActor = actor;
-							updateStatus(2, "Connected");
+							updateStatus(2, "In party.");
 							SharedPreferences mPrefs = getSharedPreferences("prefs", MODE_PRIVATE);
 							SharedPreferences.Editor ed = mPrefs.edit();
 							ed.putString("last_party_url", uri.toString());

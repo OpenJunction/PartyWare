@@ -26,11 +26,19 @@
       />
 
   <Button
-      android:id="@+id/join_debug_button"
+      android:id="@+id/update_profile_button"
       android:layout_width="200dip"
       android:layout_height="50dip"
       android:layout_margin="10dip"
-      android:text="Join Debug Party"
+      android:text="Update My Profile"
+      />
+
+  <Button
+      android:id="@+id/join_default_button"
+      android:layout_width="200dip"
+      android:layout_height="50dip"
+      android:layout_margin="10dip"
+      android:text="Join Default Party"
       />
 
   <Button

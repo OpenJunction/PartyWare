@@ -19,7 +19,6 @@ import java.util.*;
 
 public class PeopleActivity extends RichListActivity implements OnItemClickListener{
 
-	public final static int REQUEST_CODE_UPDATE_USER = 0;
 	private PeopleAdaptor mPeople;
 	private Map<String,List<String>> mPaths;
 
@@ -60,24 +59,13 @@ public class PeopleActivity extends RichListActivity implements OnItemClickListe
 		intent.putExtra("name", app.getUserName());
 		intent.putExtra("email", app.getUserEmail());
 		intent.putExtra("image_url", app.getUserImageUrl());
-		startActivityForResult(intent, REQUEST_CODE_UPDATE_USER);
+		startActivity(intent);
 	}
 
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		switch(requestCode) {
-		case REQUEST_CODE_UPDATE_USER:
-			if(resultCode == RESULT_OK){
-				String name = data.getStringExtra("name");
-				String email = data.getStringExtra("email");
-				String imageUrl = data.getStringExtra("image_url");
-				final JunctionApp app = (JunctionApp)getApplication();
-				app.updateUser(name, email, imageUrl);
-			}
-			break;
-		}
 	}
 
 

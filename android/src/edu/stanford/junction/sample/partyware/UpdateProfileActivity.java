@@ -80,7 +80,7 @@ public class UpdateProfileActivity extends RichActivity{
 		button.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
 					Helpers.takeSmallPicture(UpdateProfileActivity.this, 
-										REQUEST_CODE_TAKE_PICTURE);
+											 REQUEST_CODE_TAKE_PICTURE);
 				}
 			});
 
@@ -236,16 +236,11 @@ public class UpdateProfileActivity extends RichActivity{
 			Intent i = new Intent(this, ImgurUploadService.class);
 			stopService(i);
 
-			// return the uri with caption
-			Intent intent = new Intent();
-
 			String name = mNameText.getText().toString();
 			String email = mEmailText.getText().toString();
-
-			intent.putExtra("name", name);
-			intent.putExtra("email", email);
-			intent.putExtra("image_url", mPortraitUri.toString());
-			setResult(RESULT_OK, intent);
+			String imageUrl = mPortraitUri.toString();
+			final JunctionApp app = (JunctionApp)getApplication();
+			app.updateUser(name, email, imageUrl);
 
 			finish();
 		}
