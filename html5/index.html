@@ -46,37 +46,34 @@
   </head>
 
   <body>
-    <h1 id="mainTitle">PartyWare</h1>
 
-    <img id="qrCode" src=""></img>
+    <center>
+      
+      <input id="peopleButton" type="submit" value="People"></input>
+      <input id="picturesButton" type="submit" value="Pictures"></input>
+      <input id="playlistButton" type="submit" value="Playlist"></input>
 
-    <table id="layoutTable">
-      <tr>
-	<td id="peopleCell">
-	  <h2>People</h2>
-	  <div id="peopleView">
-	    <div id="people">
-	    </div>
-	  </div>
-	</td>
-      </tr>
-      <tr>
-	<td>
-	  <h2>Pictures</h2>
-	  <div id="picturesView">
-	    <div id="pictures">
-	    </div>
-	  </div>
-	</td>
-	<td id="playlistCell">
-	  <h2>Youtube Playlist</h2>
-	  <!-- embed the player -->
-	  <div id="ytapiplayer">
-	    You need Flash player 8+ and JavaScript enabled to view this video.
-	  </div>
+      <div id="peopleView">
+	<div id="people">
+	</div>
+	<img id="qrCode" src=""></img>
+      </div>
 
-	  <script type="text/javascript">
-	    // <![CDATA[
+      <div id="picturesView">
+	<div id="pictures">
+	</div>
+      </div>
+
+
+      <div id="playlistView">
+	<table>
+	  <tr>
+	    <td id="youtubeCell">
+	      <div id="ytapiplayer">
+		You need Flash player 8+ and JavaScript enabled to view this video.
+	      </div>
+	      <script type="text/javascript">
+		// <![CDATA[
       // allowScriptAccess must be set to allow the Javascript from one 
       // domain to access the swf on the youtube domain
       var params = { allowScriptAccess: "always", bgcolor: "#cccccc" };
@@ -86,34 +83,32 @@
       swfobject.embedSWF("http://www.youtube.com/v/PH54cp2ggFk?border=0&amp;enablejsapi=1&version=3&playerapiid=ytplayer&showinfo=0&hd=1&fs=1",
                          "ytapiplayer", "650", "516", "8", null, null, params, atts);
       //]]>
-	  </script>
+	      </script>
 
-	  
-	  <br/><br/>
-	  <input id="nextVideoButton" type="submit" value="Next Video"></input>
-	  <br/><br/>
+	      
+	      <br/><br/>
+	      <input id="nextVideoButton" type="submit" value="Next Video"></input>
+	      <br/><br/>
 
-	  <div id="playlistView">
-	    <div id="playlist">
-	    </div>
-	  </div>
-	</td>
-      </tr>
-    </table>
 
-    <div>
-      <a href="#" id="permalink">permalink</a>
-    </div>
+	    </td>
+	    <td id="playlistCell">
+	      <div id="playlistView">
+		<div id="playlist">
+		</div>
+	      </div>
+	    </td>
+	  </tr>
+	</table>
+
+      </div>
+
+    </center>
 
     <div id="controls">
+      <a href="#" id="permalink">permalink</a>
       <input id="nameInput" type="text"/>
       <input id="nameInputButton" type="submit" value="Change Party Name"></input>
-      <br/><br/>
-      <input id="picInput" type="text"/>
-      <input id="picInputButton" type="submit" value="Add Picture by URL"></input>
-      <br/><br/>
-      <input id="youtubeInput" type="text"/>
-      <input id="youtubeInputButton" type="submit" value="Add Youtube by Id"></input>
     </div>
 
     <script type="text/javascript">

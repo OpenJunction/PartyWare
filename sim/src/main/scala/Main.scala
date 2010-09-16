@@ -100,7 +100,7 @@ class User(id: String) extends Actor {
 
     var url: URI = null;
     try {
-      url = new URI("junction://" + host + "/partyware")
+      url = new URI("junction://" + host + "/partyware_session")
       try {
         val jxMaker = JunctionMaker.getInstance(new XMPPSwitchboardConfig(host))
         val jx: Junction = jxMaker.newJunction(url, jxActor)

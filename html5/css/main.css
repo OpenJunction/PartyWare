@@ -6,28 +6,30 @@ h1,h2,h3,p,a{
     color: #ffffff;
 }
 
+#controls{
+    display: none;
+}
+
 #qrCode{ 
     margin-bottom: 10px;
+    margin-top: 50px;
+    width: 400px;
+    height: 400px;
 }
 
-#layoutTable{
-    width: 100%
+#playlistView, #picturesView, #peopleView{
+    margin-top: 50px;
 }
 
-#layoutTable td{
-    padding: 10px 10px 10px 10px;
-    border: 1px solid #555555;
-    width: 50%;
+#playlistCell{ 
+    vertical-align: top;
+    padding-left: 30px;
+}
+
+#youtubeCell{ 
     vertical-align: top;
 }
 
-#playlistView, #picturesView{
-    padding: 10px 10px 10px 10px;
-}
-
-#playlistCell {
-    text-align: center;
-}
 
 #playlist .youtubeItem{ 
     cursor: pointer;
@@ -66,16 +68,6 @@ h1,h2,h3,p,a{
     vertical-align: top;
 }
 
-#pictures{ 
-    text-align: center;
-}
-
-#pictures td{ 
-    width: 100px;
-    height: 100px;
-    border: none;
-    text-align: center;
-}
 
 #pictures img {
     border: 1px solid #999999;
@@ -83,14 +75,11 @@ h1,h2,h3,p,a{
     cursor: pointer;
 }
 
-#people td {
-    width: 100%;
-    border: none;
+#people img {
+    border: 1px solid #999999;
+    height: 100px;
 }
 
-#layoutTable #peopleCell {
-    border: none;
-}
 
 
 

@@ -35,25 +35,39 @@ var PartyWare =
 							 });
 
 
-						 $("#picInputButton").click(
-							 function(){
-								 var url = $("#picInput").val();
-								 self.model.addPicture(self.userId, url, url, "..from web..");
-							 });
-
-						 $("#youtubeInputButton").click(
-							 function(){
-								 var videoId = $("#youtubeInput").val();
-								 self.model.addYoutube(
-									 null, self.userId, videoId,
-									 "http://blogs.wyomingnews.com/blogs/backstagepass/files/2009/09/youtube_logo.jpg", 
-									 "..from web..");
-							 });
-
 						 $("#nextVideoButton").click(
 							 function(){
 								 gotoNextVideo();
 							 });
+
+
+						 var hideAll = function(){
+							 $("#peopleView").hide();
+							 $("#picturesView").hide();
+							 $("#playlistView").css('visibility', 'hidden');
+						 };
+
+						 $("#peopleButton").click(
+							 function(){
+								 hideAll();
+								 $("#peopleView").show();
+							 });
+
+						 $("#picturesButton").click(
+							 function(){
+								 hideAll();
+								 $("#picturesView").show();
+							 });
+
+						 $("#playlistButton").click(
+							 function(){
+								 hideAll();
+								 $("#playlistView").css('visibility', 'visible');
+							 });
+
+						 $("#peopleView").show();
+						 $("#picturesView").hide();
+						 $("#playlistView").css('visibility', 'hidden');
 					 },
 
 					 userId: randomUUID(),
@@ -81,7 +95,7 @@ var PartyWare =
 						 $("#pictures").children().remove();
 						 var pics = this.model.getPictures();
 						 table = this.buildTable(
-							 pics, 5, 
+							 pics, 8, 
 							 function(ea,cell){
 								 div = $("<div/>");
 								 var img = $('<img/>').attr({src: ea.url});
