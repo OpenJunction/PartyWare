@@ -218,7 +218,7 @@ public class JunctionApp extends Application {
 							}
 						};
 
-					final XMPPSwitchboardConfig sb = new XMPPSwitchboardConfig("openjunction.org");
+					final XMPPSwitchboardConfig sb = new XMPPSwitchboardConfig("sb.openjunction.org");
 					sb.setConnectionTimeout(20000); // 20 secs
 
 					URI url = null;

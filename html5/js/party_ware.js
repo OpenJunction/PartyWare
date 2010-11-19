@@ -203,7 +203,7 @@ var PartyWare =
 
 
 				 var ascript = {
-					 host: "openjunction.org",
+					 host: "sb.openjunction.org",
 					 ad: "edu.stanford.junction.partyware",
 					 friendlyName: "PartyWare",
 					 roles: { "buddy": {"platforms" : { /* platform definitions */ }}},

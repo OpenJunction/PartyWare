@@ -32,7 +32,7 @@ public class PartyActivity extends RichActivity{
 				public void onClick(View v) {
 					JunctionApp app = (JunctionApp)getApplication();
 					app.connectToSession(
-						Uri.parse("junction://openjunction.org/partyware_session"));
+						Uri.parse("junction://sb.openjunction.org/partyware_session"));
 				}
 			});
 
