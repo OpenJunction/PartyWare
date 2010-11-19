@@ -94,7 +94,7 @@ class User(id: String) extends Actor {
     }
   }
 
-  val host = "openjunction.org"
+  val host = "sb.openjunction.org"
 
   def initJunction {
 
