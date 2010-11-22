@@ -44,7 +44,8 @@ h1,h2,h3,p,a{
 }
 
 #playlist .playlistItemTable {
-    border: 1px solid #555555;
+    background-color: #426e91;
+    border-top: 1px solid #AAAAAA;
     width: 100%;
 }
 

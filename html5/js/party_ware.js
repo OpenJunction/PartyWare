@@ -16,7 +16,6 @@ var PartyWare =
 						 this.model.addChangeListener({ type: "sync",
 														onChange: function(o){
 															var vids = self.model.getPlaylist();
-															alert("lsdkjf");
 															if(vids.length > 0){
 																//loadNewVideo(vids[0].videoId, 0);
 															}
