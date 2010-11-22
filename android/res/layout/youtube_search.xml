@@ -16,6 +16,7 @@
 	android:layout_height="50dip"
 	android:layout_weight="0.3"
 	android:layout_margin="5dip"
+	android:text="madonna"
 	/>
     <Button
 	android:id="@+id/search_button"
