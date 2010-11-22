@@ -1,0 +1,52 @@
+var PartyWareDef = {
+
+	"initial" : function(){
+		return {
+			"objects" : {}
+		};
+	},
+
+	"operations" : {
+
+		"addObj" : function(s, op){
+			var obj = op.item;
+			s.objects[obj.id] = obj;
+			return s;
+		},
+
+		"deleteObj" : function(s, op){
+			var id = op.itemId;
+			delete s.objects[id];
+			return s;
+		},
+
+		"setName" : function(s, op){
+			s.name = op.name;
+			return s;
+		},
+
+		"vote" : function(s, op){
+			var count = op.count;
+			var obj = s.objects[op.itemId];
+			if(obj){
+				var cur = obj.votes || 0;
+				obj.votes = cur + count;
+			}
+			return s;
+		}
+
+	}
+};
+
+
+
+
+
+
+//////////////////////////////////////////////
+
+JSONObject opDeleteObj(JSONObject s, JSONObject o){
+	Object id = jsFieldAccess(o,"itemId");
+	jsDelete(jsIndexedFieldRef(jsFieldAccess(s,"objects"),"id"));
+	return s;
+}
