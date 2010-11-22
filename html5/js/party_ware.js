@@ -16,8 +16,9 @@ var PartyWare =
 						 this.model.addChangeListener({ type: "sync",
 														onChange: function(o){
 															var vids = self.model.getPlaylist();
+															alert("lsdkjf");
 															if(vids.length > 0){
-																loadNewVideo(vids[0].videoId, 0);
+																//loadNewVideo(vids[0].videoId, 0);
 															}
 														}});
 
@@ -28,46 +29,7 @@ var PartyWare =
 							 });
 
 
-						 $("#nameInputButton").click(
-							 function(){
-								 var name = $("#nameInput").val();
-								 self.model.setName(name);
-							 });
-
-
-						 $("#nextVideoButton").click(
-							 function(){
-								 gotoNextVideo();
-							 });
-
-
-						 var hideAll = function(){
-							 $("#peopleView").hide();
-							 $("#picturesView").hide();
-							 $("#playlistView").css('visibility', 'hidden');
-						 };
-
-						 $("#peopleButton").click(
-							 function(){
-								 hideAll();
-								 $("#peopleView").show();
-							 });
-
-						 $("#picturesButton").click(
-							 function(){
-								 hideAll();
-								 $("#picturesView").show();
-							 });
-
-						 $("#playlistButton").click(
-							 function(){
-								 hideAll();
-								 $("#playlistView").css('visibility', 'visible');
-							 });
-
-						 $("#peopleView").show();
-						 $("#picturesView").hide();
-						 $("#playlistView").css('visibility', 'hidden');
+						 $("#playlistView").show();
 					 },
 
 					 userId: randomUUID(),
@@ -76,46 +38,6 @@ var PartyWare =
 						 var self = this;
 						 var i,div;
 
-						 // Update the people list 
-						 $("#people").children().remove();
-						 var people = this.model.getUsers();
-						 var table = this.buildTable(
-							 people, 8, 
-							 function(ea,cell){
-								 div = $("<div/>");
-								 var img = $('<img/>').attr({src: ea.imageUrl});
-								 $(div).append(img);
-								 $(div).append($('<p/>').text(ea.name));
-								 $(cell).append(div);
-							 });
-						 $("#people").append(table);
-
-
-						 // Update the pictures list 
-						 $("#pictures").children().remove();
-						 var pics = this.model.getPictures();
-						 table = this.buildTable(
-							 pics, 8, 
-							 function(ea,cell){
-								 div = $("<div/>");
-								 var img = $('<img/>').attr({src: ea.url});
-								 $(div).append(img);
-								 $(div).append($('<p/>').text("\'" + ea.caption + "\'"));
-								 $(img).click(
-									 function(){
-										 Shadowbox.open(
-											 {
-												 player: "img",
-												 content: ea.url
-											 });
-									 });
-
-								 $(cell).append(div);
-							 });
-						 $("#pictures").append(table);
-
-
-
 						 // Update the youtube list
 						 $("#playlist").children().remove();
 						 var vids = this.model.getPlaylist();
@@ -123,7 +45,7 @@ var PartyWare =
 									div = $("<div/>").addClass("youtubeItem");
 									$(div).click(
 										function(){
-											loadNewVideo(ea.videoId, 0);
+											//loadNewVideo(ea.videoId, 0);
 										});
 									var img = $('<img/>').attr({src: ea.thumbUrl});
 									var cap = $('<p/>').text("\'" + ea.caption + "\'");

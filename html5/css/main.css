@@ -17,7 +17,8 @@ h1,h2,h3,p,a{
     height: 400px;
 }
 
-#playlistView, #picturesView, #peopleView{
+#playlistView {
+    width: 100%;
     margin-top: 50px;
 }
 
