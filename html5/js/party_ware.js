@@ -57,10 +57,10 @@ var PartyWare =
 									var tr = $('<tr/>');
 									var imgCell = $('<td/>').append(img).addClass('imgCell');
 									var textCell = $('<td/>').append(cap).append(votes).addClass('textCell');
-									//var ctrlCell = $('<td/>').append(closeLink).addClass('ctrlCell');
+									var ctrlCell = $('<td/>').append(closeLink).addClass('ctrlCell');
 									$(tr).append(imgCell);
 									$(tr).append(textCell);
-									$(tr).append(ctrlCell);
+									//$(tr).append(ctrlCell);
 									$(table).append(tr);
 									$(div).append(table);
 									$("#playlist").append(div);
