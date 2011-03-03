@@ -10,9 +10,6 @@
       android:smallScreens="true"
       android:anyDensity="true"/>
 
-  <uses-sdk android:minSdkVersion="2" />
-
-
   <!-- PERMISSIONS -->
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="android.permission.CAMERA"/>
@@ -20,6 +17,7 @@
   <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
   <uses-permission android:name="android.permission.READ_CONTACTS"/>
   <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+  <uses-permission android:name="android.permission.NFC" />
 
 
   <application android:name="edu.stanford.junction.sample.partyware.JunctionApp"

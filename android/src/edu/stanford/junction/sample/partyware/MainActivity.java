@@ -14,8 +14,12 @@ import android.os.Message;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TabHost;
-
-
+import android.widget.Toast;
+import android.nfc.*;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.net.Uri;
 
 public class MainActivity extends TabActivity{
 
@@ -23,11 +27,11 @@ public class MainActivity extends TabActivity{
 	private ImageView mJunctionStatusLight;
 	private BroadcastReceiver mJunctionStatusReceiver;
 	private IPropChangeListener mSyncListener;
+	private NfcAdapter mNfcAdapter;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-
 
 		// Monitor state of the junction connection
 
@@ -100,6 +104,35 @@ public class MainActivity extends TabActivity{
 
 		tabHost.setCurrentTab(0);
 
+		mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+
+
+
+		// Check for uri intent
+
+		Intent creationItent = getIntent();
+		final String scheme=creationItent.getScheme();
+		if(scheme != null && scheme.equals(JunctionApp.SHARE_PARTY_SCHEME)){
+			final Uri uri=creationItent.getData();
+			if(uri != null){
+				Uri.Builder builder = uri.buildUpon();
+				Uri jxUri = builder.scheme(JunctionApp.JUNCTION_SCHEME).build();
+				app.connectToSession(jxUri);
+			}
+			else{
+				Toast.makeText(this, "Received null url...", 
+							   Toast.LENGTH_SHORT).show();
+			}
+		}
+		else{
+			Toast.makeText(this, "Failed to receive party invite :(", 
+						   Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	@Override
+	protected void onPause() {
+		mNfcAdapter.disableForegroundNdefPush(this);
 	}
 
 	private void updateJunctionStatus(int status, String statusText){
@@ -113,6 +146,47 @@ public class MainActivity extends TabActivity{
 			mJunctionStatusLight.setImageResource(R.drawable.led_green);
 		}
 		mJunctionStatus.setText(statusText);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu){
+		return true;
+	}
+
+	@Override
+	public boolean onPreparePanel(int featureId, View view, Menu menu) {
+		menu.clear();
+		menu.add(0, 0, 0, "Invite with NFC");
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()){
+		case 0: {
+			shareActivity();
+			return true;
+		}
+		default: return false;
+		}
+	}
+
+	protected void shareActivity(){
+		JunctionApp app = (JunctionApp)getApplication();
+		Uri uri = app.currentNfcSharingUri();
+		if(uri != null){
+			NdefRecord urlRecord = new NdefRecord(
+				NdefRecord.TNF_ABSOLUTE_URI, 
+				NdefRecord.RTD_URI, new byte[] {}, 
+				uri.toString().getBytes());
+			NdefMessage ndef = new NdefMessage(new NdefRecord[] { urlRecord });
+			mNfcAdapter.enableForegroundNdefPush(this, ndef);
+			Toast.makeText(this, "Sharing " + uri + ". Swipe with your friend!", 
+						   Toast.LENGTH_SHORT).show();
+		}
+		else{
+			Toast.makeText(this, "Oops! no junction url.", Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	public void onDestroy(){

@@ -20,7 +20,12 @@ import edu.stanford.junction.provider.xmpp.XMPPSwitchboardConfig;
 
 import org.json.JSONObject;
 
+
+
 public class JunctionApp extends Application {
+
+	public static final String SHARE_PARTY_SCHEME = "partyware";
+	public static final String JUNCTION_SCHEME = "junction";
 
     private JunctionActor jxActor;
     private PartyProp partyProp;
@@ -34,6 +39,7 @@ public class JunctionApp extends Application {
 	private int mConnectionStatus = 0;
 	private String mConnectionStatusText = "Not in a party.";
     public static final String BROADCAST_STATUS = "edu.stanford.junction.sample.partyware.JunctionStatus";
+	private Uri mCurrentUri;
 
 	public PartyProp getProp() {
 		return partyProp;
@@ -147,6 +153,18 @@ public class JunctionApp extends Application {
 		}
 	}
 
+	public Uri currentJunctionUri(){
+		return this.mCurrentUri;
+	}
+
+	public Uri currentNfcSharingUri(){
+		if(this.mCurrentUri != null){
+			Uri.Builder builder = this.mCurrentUri.buildUpon();
+			return builder.scheme(SHARE_PARTY_SCHEME).build();
+		}
+		return null;
+	}
+
 	private void updateStatus(int status, String msg){
 		final Intent i = new Intent(BROADCAST_STATUS);
 		mConnectionStatus = status;
@@ -235,6 +253,7 @@ public class JunctionApp extends Application {
 						if(!isInterrupted()){
 							JunctionApp.this.jxActor = actor;
 							updateStatus(2, "In party.");
+							JunctionApp.this.mCurrentUri = uri;
 							SharedPreferences mPrefs = getSharedPreferences("prefs", MODE_PRIVATE);
 							SharedPreferences.Editor ed = mPrefs.edit();
 							ed.putString("last_party_url", uri.toString());
