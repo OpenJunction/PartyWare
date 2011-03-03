@@ -113,7 +113,7 @@ limitations under the License.
   <string name="preferences_bulk_mode_summary">Scan and save many barcodes continuously</string>
   <string name="preferences_bulk_mode_title">Bulk scan mode</string>
   <string name="preferences_copy_to_clipboard_title">Copy to clipboard</string>
-  <string name="preferences_custom_product_search_summary">Use %s as a placeholder for the product ID, and %f for format</string>
+<string name="preferences_custom_product_search_summary">Use %1$s as a placeholder for the product ID, and %2$f for format</string>
   <string name="preferences_custom_product_search_title">Custom search URL</string>
   <string name="preferences_decode_1D_title">Decode 1D barcodes</string>
   <string name="preferences_decode_QR_title">Decode QR Codes</string>
