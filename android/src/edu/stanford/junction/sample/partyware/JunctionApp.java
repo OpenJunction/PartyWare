@@ -1,8 +1,6 @@
 package edu.stanford.junction.sample.partyware;
-
 import java.net.*;
 import java.util.*;
-
 import android.app.Application;
 import android.content.SharedPreferences;
 import android.content.Intent;
@@ -10,16 +8,13 @@ import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
 import android.telephony.*;  
-
 import edu.stanford.junction.android.AndroidJunctionMaker;
 import edu.stanford.junction.JunctionException;
 import edu.stanford.junction.api.activity.JunctionActor;
 import edu.stanford.junction.api.activity.JunctionExtra;
 import edu.stanford.junction.api.messaging.MessageHeader;
 import edu.stanford.junction.provider.xmpp.XMPPSwitchboardConfig;
-
 import org.json.JSONObject;
-
 
 
 public class JunctionApp extends Application {
@@ -95,19 +90,19 @@ public class JunctionApp extends Application {
 	public int getConnectionStatus(){
 		return mConnectionStatus;
 	}
-
+	
 	protected String buildUserId(){
-		TelephonyManager mTelephonyMgr = (TelephonyManager)getSystemService(TELEPHONY_SERVICE);  
+		TelephonyManager mTelephonyMgr = (TelephonyManager)getSystemService(TELEPHONY_SERVICE);
 		int code = 0;
-        String imei = mTelephonyMgr.getDeviceId(); 
+        String imei = mTelephonyMgr.getDeviceId();
 		if(imei != null){
 			code ^= imei.hashCode();
 		}
-        String softwareVer = mTelephonyMgr.getDeviceSoftwareVersion(); 
+        String softwareVer = mTelephonyMgr.getDeviceSoftwareVersion();
 		if(softwareVer != null){
 			code ^= softwareVer.hashCode();
 		}
-        String simSerial = mTelephonyMgr.getSimSerialNumber(); 
+        String simSerial = mTelephonyMgr.getSimSerialNumber();
 		if(simSerial != null){
 			code ^= simSerial.hashCode();
 		}
@@ -128,7 +123,6 @@ public class JunctionApp extends Application {
 		super.onCreate();
 		partyProp = new PartyProp("party_prop");
 		mUserId = buildUserId();
-
 
 		SharedPreferences mPrefs = getSharedPreferences("prefs", MODE_PRIVATE);
 

@@ -107,9 +107,7 @@ public class MainActivity extends TabActivity{
 		mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
 
-
 		// Check for uri intent
-
 		Intent creationItent = getIntent();
 		final String scheme=creationItent.getScheme();
 		if(scheme != null && scheme.equals(JunctionApp.SHARE_PARTY_SCHEME)){
@@ -132,6 +130,7 @@ public class MainActivity extends TabActivity{
 
 	@Override
 	protected void onPause() {
+        super.onPause();
 		mNfcAdapter.disableForegroundNdefPush(this);
 	}
 
