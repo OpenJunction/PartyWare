@@ -1,0 +1,19 @@
+* Remove the upload notification
+* Add people to android contacts
+* Add owner names to content
+* Periodically (and on demand) save (state,state#,sessionId) snapshots to db
+
+* Add Load Recent Party button
+
+
+
+* wifi
+* distribute url in easier way
+
+
+
+* Bugs from demo
+** camera crash on non-droid -- maybe fixed? test on Monica and Alex's
+** cancel youtube searches and image uploads
+
+

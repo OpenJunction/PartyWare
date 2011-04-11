@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    >
+
+  <LinearLayout
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      android:layout_gravity="center_horizontal"
+      >
+    <ImageView
+	android:id="@+id/image"
+	android:layout_width="fill_parent"
+	android:layout_height="100dip"
+	android:layout_margin="10dip"
+	android:scaleType="fitCenter"
+	/>
+  </LinearLayout>
+
+
+  <LinearLayout
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      android:orientation="horizontal"
+      android:layout_marginBottom="10dip"
+      android:gravity="center">
+    <Button
+	android:id="@+id/use_camera_button"
+	android:layout_weight="0.5"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:text="Take Picture"/> 
+    <Button
+	android:id="@+id/pick_from_library_button"
+	android:layout_weight="0.5"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:text="Find Picture"/>    
+  </LinearLayout>
+
+
+
+  <TextView
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="5dip"
+      android:layout_margin="5dip"
+      android:gravity="left"
+      android:text="Name:"
+      android:textStyle="bold"
+      />
+  <AutoCompleteTextView
+      android:id="@+id/name_text"
+      android:nextFocusDown="@+id/email_text"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:gravity="left"
+      android:layout_marginBottom="10dip"
+      android:layout_marginLeft="10dip"
+      android:layout_marginRight="10dip"
+      android:inputType="textPersonName"
+      android:hint="Your Name"
+      />
+  <TextView
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_margin="5dip"
+      android:gravity="left"
+      android:text="Email:"
+      android:textStyle="bold"
+      />
+  <AutoCompleteTextView
+      android:id="@+id/email_text"
+      android:nextFocusDown="@+id/finished_button"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:gravity="left"
+      android:layout_marginBottom="5dip"
+      android:layout_marginLeft="10dip"
+      android:layout_marginRight="10dip"
+      android:inputType="textEmailAddress"
+      android:hint="Your Email"
+      />
+
+  <LinearLayout
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_margin="10dip"
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      android:orientation="horizontal"
+      android:gravity="center"
+      >
+    <Button
+	android:id="@+id/finished_button"
+	android:layout_width="100dip"
+	android:layout_height="wrap_content"
+	android:text="Save"
+	/>
+    <Button
+	android:id="@+id/cancel_button"
+	android:layout_width="100dip"
+	android:layout_height="wrap_content"
+	android:text="Cancel"
+	/>
+  </LinearLayout>
+
+
+</LinearLayout>

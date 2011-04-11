@@ -164,7 +164,7 @@ public class YoutubePlaylistActivity extends RichListActivity implements OnItemC
 				TextView bt = (TextView) v.findViewById(R.id.bottomtext);
 
 				if(position == 0){
-					tt.setText("Next to play");
+					tt.setText("#1 video!");
 					tt.setTextColor(0xffffdd00);
 					v.setBackgroundColor(0xff222222);
 				}

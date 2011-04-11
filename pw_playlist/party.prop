@@ -1,0 +1,86 @@
+(
+  "initial"
+     (fn ()
+      (let ((state (new-obj)))
+        (put state "name" "unnamed")
+        (put state "objects" (new))
+	state
+	))
+
+
+  "operations"
+   (
+     "addObj"
+     (fn (state op)
+      (let ((item (get op "item"))
+            (id (get item "id"))
+	    (objects (get state "objects")))
+        (put objects id item)
+	state
+	))
+
+     "deleteObj"
+     (fn (state op)
+      (let ((id (get op "itemId"))
+	    (objects (get state "objects")))
+        (del objects id)
+	state
+	))
+
+     "setName"
+     (fn (state op)
+      (let ((name (get op "name")))
+        (put state "name" name)
+	state
+	))
+
+     "resetVoteHistory"
+     (fn (state op)
+       (put state "voteHistory" (new-obj)))
+
+     "vote"
+     (fn (state op)
+      (let ((id (get op "itemId"))
+	    (count (get op "count"))
+	    (objects (get state "objects"))
+	    (obj (get objects id))
+	    (cur (get obj "votes")))
+	(put obj "votes" (+ cur count))
+	))
+
+   )
+)
+  
+			if(type.equals("addObj")){
+				JSONObject item = op.optJSONObject("item");
+				String id = item.optString("id");
+				objects.put(id, (new JSONObjWrapper(item)));
+			}
+			else if(type.equals("deleteObj")){
+				String id = op.optString("itemId");
+				objects.remove(id);
+			}
+			else if(type.equals("setName")){
+				String name = op.optString("name");
+				this.name = name;
+			}
+			else if(type.equals("resetVoteHistory")){
+				this.voteHistory.clear();
+			}
+			else if(type.equals("vote")){
+				String id = op.optString("itemId");
+				int count = op.optInt("count");
+				JSONObject o = objects.get(id);
+				if(o != null){
+					int cur = o.optInt("votes");
+					try{
+						o.put("votes", cur + count);
+					}
+					catch(JSONException e){
+						e.printStackTrace(System.err);
+					}
+				}
+				else{
+					System.err.println("Couldn't find object for id: " + id);
+				}
+			}

@@ -1,0 +1,31 @@
+<resources>
+  <string-array name="relationships">
+    <item>none</item>
+    <item>friend</item>
+    <item>old friend</item>
+    <item>coworker</item>
+    <item>ex-coworker</item>
+    <item>employer</item>
+    <item>employee</item>
+    <item>teacher</item>
+    <item>student</item>
+    <item>significant other</item>
+    <item>fiancé</item>
+    <item>spouse</item>
+  </string-array>
+
+  <string-array name="reverse_relationships">
+    <item>none</item>
+    <item>friend</item>
+    <item>old friend</item>
+    <item>coworker</item>
+    <item>ex-coworker</item>
+    <item>employee</item>
+    <item>employer</item>
+    <item>student</item>
+    <item>teacher</item>
+    <item>significant other</item>
+    <item>fiancé</item>
+    <item>spouse</item>
+  </string-array>
+</resources>

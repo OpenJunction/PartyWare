@@ -1,0 +1,1 @@
+scp bin/PartyWare-debug.apk www@aemon.com:~/public/aemon/file_dump

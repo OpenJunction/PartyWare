@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	      android:orientation="vertical"
+	      android:layout_width="fill_parent"
+	      android:layout_height="fill_parent">
+  <TabHost android:id="@android:id/tabhost"
+	   android:layout_width="fill_parent"
+	   android:layout_height="fill_parent"
+	   >
+    <LinearLayout
+	android:orientation="vertical"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+      <TabWidget
+	  android:id="@android:id/tabs"
+	  android:layout_width="fill_parent"
+	  android:layout_height="wrap_content" />
+      <FrameLayout
+	  android:id="@android:id/tabcontent"
+	  android:layout_width="fill_parent"
+	  android:layout_height="fill_parent"
+	  android:layout_weight="0.5"
+	  android:padding="5dp" />
+      <LinearLayout
+	  android:orientation="horizontal"
+	  android:layout_width="fill_parent"
+	  android:layout_height="wrap_content"
+	  android:background="#222222"
+	  android:gravity="center_vertical|left">
+	<ImageView
+	    android:id="@+id/junction_status_icon"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_margin="5dp"
+	    android:src="@drawable/led_red" />
+	<TextView
+	    android:id="@+id/junction_status_text"
+	    android:textColor="#ffffff"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:text="Disconnected"
+	    android:gravity="center_vertical|left"/>
+      </LinearLayout>
+    </LinearLayout>
+  </TabHost>
+</LinearLayout>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    >
+
+  <LinearLayout
+      android:layout_width="fill_parent"
+      android:layout_height="100dip"
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      android:orientation="horizontal"
+      android:gravity="center_vertical"
+      >
+    <Button
+	android:id="@+id/find_video_button"
+	android:layout_width="100dip"
+	android:layout_height="50dip"
+	android:text="Pick from Library"
+	/>    
+  </LinearLayout>
+
+  <TextView       
+      android:id="@+id/uri_view"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:gravity="left"
+      android:textSize="18sp"
+      android:layout_weight="0.8"
+      android:layout_margin="5dip"
+      />        
+
+  <EditText       
+      android:id="@+id/caption_text"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:gravity="top|left"
+      android:textSize="18sp"
+      android:layout_weight="0.8"
+      android:layout_margin="10dip"
+      />
+
+
+  <LinearLayout
+      android:layout_width="fill_parent"
+      android:layout_height="100dip"
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      android:orientation="horizontal"
+      android:gravity="center"
+      >
+    <Button
+	android:id="@+id/finished_button"
+	android:layout_width="100dip"
+	android:layout_height="50dip"
+	android:text="Ok"
+	/>
+    <Button
+	android:id="@+id/cancel_button"
+	android:layout_width="100dip"
+	android:layout_height="50dip"
+	android:text="Cancel"
+	/>
+  </LinearLayout>
+
+
+</LinearLayout>
