@@ -13,6 +13,7 @@ import android.telephony.*;
 
 import edu.stanford.junction.android.AndroidJunctionMaker;
 import edu.stanford.junction.JunctionException;
+import edu.stanford.junction.JunctionMaker;
 import edu.stanford.junction.api.activity.JunctionActor;
 import edu.stanford.junction.api.activity.JunctionExtra;
 import edu.stanford.junction.api.messaging.MessageHeader;
@@ -140,7 +141,7 @@ public class JunctionApp extends Application {
 		}
 
 		// Maybe auto-connect
-		String url = mPrefs.getString("last_party_url", null);
+		String url = null; //mPrefs.getString("last_party_url", null);
 		if(url != null){
 			updateStatus(1, "Joining previous party...");
 			connectToSession(Uri.parse(url));				
@@ -219,11 +220,16 @@ public class JunctionApp extends Application {
 						};
 
 					final XMPPSwitchboardConfig sb = new XMPPSwitchboardConfig("sb.openjunction.org");
+					JunctionMaker maker = JunctionMaker.getInstance(sb);
 					sb.setConnectionTimeout(20000); // 20 secs
 
 					URI url = null;
 					try{
-						url = new URI(uri.toString());
+	                    if (uri == null) {
+	                        url = new URI(maker.generateSessionUri().toString());
+	                    } else {
+	                        url = new URI(uri.toString());
+	                    }	
 					}
 					catch(URISyntaxException e){
 						Log.e("JunctionApp", "Failed to parse uri: " + uri.toString());
